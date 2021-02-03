@@ -104,14 +104,14 @@ jobs:
         run: pip install .[tests]
 
       - name: Run Indy Plenum ${{ matrix.module }} test slice ${{ matrix.slice }}/3
-        run: RUSTPYTHONASYNCIODEBUG=0 python3 runner.py --pytest "python3 -m pytest -l -vv --junitxml=test-result-plenum-${{ matrix.module }}-${{ matrix.slice }}.xml" --dir "${{ matrix.module }}" --output "test-result-plenum-${{ matrix.slice }}.txt" --test-only-slice "${{ matrix.slice }}/3"
+        run: RUSTPYTHONASYNCIODEBUG=0 python3 runner.py --pytest "python3 -m pytest -l -vv" --dir "${{ matrix.module }}" --output "test-result-plenum-${{ matrix.slice }}.txt" --test-only-slice "${{ matrix.slice }}/3"
 
       - name: Publish Test Report
         uses: scacap/action-surefire-report@v1
         with:
           check_name: Indy Plenum ${{ matrix.module }} Test Report for slice ${{ matrix.slice }}/3
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          report_paths: test-result-plenum-${{ matrix.module }}-${{ matrix.slice }}.xml
+          report_paths: "*-test-results.xml"
 
   indy_plenum:
     name: Indy Plenum Tests
