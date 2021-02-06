@@ -94,7 +94,10 @@ jobs:
     strategy:
       matrix:
         module: [plenum]
-        slice: [1, 2, 3, 4, 5, 6]
+        # To slice up the tests into smaller chunks add additional sequential
+        # numbers here.  The subsequent steps will adjust automatically.
+        # ${{ strategy.job-total }} is used to get the total number of slices.
+        slice: [1, 2, 3, 4, 5, 6, 7, 8]
       fail-fast: false
     steps:
       - name: Check out code
@@ -103,22 +106,23 @@ jobs:
       - name: Install dependencies
         run: pip install .[tests]
 
-      - name: Run Indy Plenum ${{ matrix.module }} test slice ${{ matrix.slice }}/6
+      - name: Run Indy Plenum ${{ matrix.module }} test slice ${{ matrix.slice }}/${{ strategy.job-total }}
         id: plenum-test
-        run: RUSTPYTHONASYNCIODEBUG=0 python3 runner.py --pytest "python3 -m pytest -l -vv" --dir "${{ matrix.module }}" --output "test-result-plenum-${{ matrix.slice }}.txt" --test-only-slice "${{ matrix.slice }}/6"
+        run: RUSTPYTHONASYNCIODEBUG=0 python3 runner.py --pytest "python3 -m pytest -l -vv" --dir "${{ matrix.module }}" --output "test-result-plenum-${{ matrix.slice }}.txt" --test-only-slice "${{ matrix.slice }}/${{ strategy.job-total }}"
 
-      # TODO: Don't want this to fail the build.
-      #       Slice 2 has 8892 tests, and this causes memory issues with the publish step.
+      # This step can fail if there are too many test results, which causes out of memory issues.
+      # To avoid this, tests can be broken into smaller (more) slices.
       - name: Publish Test Report
+        if: succeeded() || failed()
         uses: scacap/action-surefire-report@v1
         with:
-          check_name: Indy Plenum ${{ matrix.module }} Test Report for slice ${{ matrix.slice }}/3
+          check_name: Indy Plenum ${{ matrix.module }} Test Report for slice ${{ matrix.slice }}/${{ strategy.job-total }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
           report_paths: "*-test-results.xml"
 
-      - name: 'Upload Detailed Test Results'
+      - name: 'Upload Detailed Test FailureResults'
         # The test runner only emits the detailed test results if the tests fail.
-        if: steps.plenum-test.outcome == 'failure'
+        if: (succeeded() || failed()) && steps.plenum-test.outcome == 'failure'
         uses: actions/upload-artifact@v2
         with:
           name: detailed-test-results
