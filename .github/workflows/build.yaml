@@ -113,7 +113,7 @@ jobs:
       # This step can fail if there are too many test results, which causes out of memory issues.
       # To avoid this, tests can be broken into smaller (more) slices.
       - name: Publish Test Report
-        if: ${{ success() }} || ${{ failure() }}
+        if: success() || failure()
         uses: scacap/action-surefire-report@v1
         with:
           check_name: Indy Plenum ${{ matrix.module }} Test Report for slice ${{ matrix.slice }}/${{ strategy.job-total }}
@@ -122,7 +122,7 @@ jobs:
 
       - name: 'Upload Detailed Test FailureResults'
         # The test runner only emits the detailed test results if the tests fail.
-        if: (${{ success() }} || ${{ failure() }}) && steps.plenum-test.outcome == 'failure'
+        if: steps.plenum-test.outcome == 'failure'
         uses: actions/upload-artifact@v2
         with:
           name: detailed-test-results
