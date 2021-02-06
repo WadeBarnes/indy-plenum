@@ -97,7 +97,7 @@ jobs:
         # To slice up the tests into smaller chunks add additional sequential
         # numbers here.  The subsequent steps will adjust automatically.
         # ${{ strategy.job-total }} is used to get the total number of slices.
-        slice: [1, 2, 3, 4, 5, 6, 7, 8]
+        slice: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
       fail-fast: false
     steps:
       - name: Check out code
@@ -122,7 +122,7 @@ jobs:
 
       - name: 'Upload Detailed Test FailureResults'
         # The test runner only emits the detailed test results if the tests fail.
-        if: steps.plenum-test.outcome == 'failure'
+        if: (steps.plenum-test.outcome == 'failure') && failure()
         uses: actions/upload-artifact@v2
         with:
           name: detailed-test-results
