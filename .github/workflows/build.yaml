@@ -94,7 +94,7 @@ jobs:
     strategy:
       matrix:
         module: [plenum]
-        slice: [1, 2, 3]
+        slice: [1, 2, 3, 4, 5, 6]
       fail-fast: false
     steps:
       - name: Check out code
@@ -104,8 +104,11 @@ jobs:
         run: pip install .[tests]
 
       - name: Run Indy Plenum ${{ matrix.module }} test slice ${{ matrix.slice }}/3
+        id: plenum-test
         run: RUSTPYTHONASYNCIODEBUG=0 python3 runner.py --pytest "python3 -m pytest -l -vv" --dir "${{ matrix.module }}" --output "test-result-plenum-${{ matrix.slice }}.txt" --test-only-slice "${{ matrix.slice }}/3"
 
+      # TODO: Don't want this to fail the build.
+      #       Slice 2 has 8892 tests, and this causes memory issues with the publish step.
       - name: Publish Test Report
         uses: scacap/action-surefire-report@v1
         with:
@@ -114,6 +117,8 @@ jobs:
           report_paths: "*-test-results.xml"
 
       - name: 'Upload Detailed Test Results'
+        # The test runner only emits the detailed test results if the tests fail.
+        if: steps.plenum-test.outcome == 'failure'
         uses: actions/upload-artifact@v2
         with:
           name: detailed-test-results
