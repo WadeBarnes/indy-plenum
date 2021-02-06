@@ -103,9 +103,9 @@ jobs:
       - name: Install dependencies
         run: pip install .[tests]
 
-      - name: Run Indy Plenum ${{ matrix.module }} test slice ${{ matrix.slice }}/3
+      - name: Run Indy Plenum ${{ matrix.module }} test slice ${{ matrix.slice }}/6
         id: plenum-test
-        run: RUSTPYTHONASYNCIODEBUG=0 python3 runner.py --pytest "python3 -m pytest -l -vv" --dir "${{ matrix.module }}" --output "test-result-plenum-${{ matrix.slice }}.txt" --test-only-slice "${{ matrix.slice }}/3"
+        run: RUSTPYTHONASYNCIODEBUG=0 python3 runner.py --pytest "python3 -m pytest -l -vv" --dir "${{ matrix.module }}" --output "test-result-plenum-${{ matrix.slice }}.txt" --test-only-slice "${{ matrix.slice }}/6"
 
       # TODO: Don't want this to fail the build.
       #       Slice 2 has 8892 tests, and this causes memory issues with the publish step.
