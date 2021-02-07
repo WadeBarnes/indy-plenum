@@ -89,6 +89,10 @@ jobs:
     # Reference to workflow-setup job is required to access the GITHUB_REPOSITORY_NAME output.
     needs: [workflow-setup, build-image]
     runs-on: ubuntu-20.04
+    # Fix for scacap/action-surefire-report out of memory error:
+    # - https://github.com/ScaCap/action-surefire-report/issues/17
+    env:
+      NODE_OPTIONS: '--max_old_space_size=4096'
     container:
       image: ghcr.io/${{ needs.workflow-setup.outputs.GITHUB_REPOSITORY_NAME }}/plenum-build
     strategy:
