@@ -1,7 +1,7 @@
 {
     "files": [
       {
-        "pattern": "to_publish/*.deb",
+        "pattern": "/__w/indy-plenum/indy-plenum/to_publish/*.deb",
         "target": "indy/pool/stable/i/indy-plenum/"
       }]
 
