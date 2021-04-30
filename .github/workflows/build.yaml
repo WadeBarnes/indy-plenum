@@ -3,27 +3,27 @@ on: [ push, pull_request, workflow_dispatch ]
 
 jobs:
 
-  # workflow-setup:
-  #   runs-on: ubuntu-latest
-  #   outputs:
-  #     CACHE_KEY_BUILD: ${{ steps.cache.outputs.CACHE_KEY_BUILD }}
-  #     CACHE_KEY_LINT: ${{ steps.cache.outputs.CACHE_KEY_LINT }}
-  #     # Expose the lowercase version of the GitHub repository name
-  #     # to all subsequent jobs that reference image repositories
-  #     # as the push and pull operations require the URL of the repository
-  #     # to be in lowercase.
-  #     GITHUB_REPOSITORY_NAME: ${{ steps.cache.outputs.GITHUB_REPOSITORY_NAME }}
-  #   steps:
-  #     - name: Git checkout
-  #       uses: actions/checkout@v2
+  workflow-setup:
+    runs-on: ubuntu-latest
+    outputs:
+      CACHE_KEY_BUILD: ${{ steps.cache.outputs.CACHE_KEY_BUILD }}
+      CACHE_KEY_LINT: ${{ steps.cache.outputs.CACHE_KEY_LINT }}
+      # Expose the lowercase version of the GitHub repository name
+      # to all subsequent jobs that reference image repositories
+      # as the push and pull operations require the URL of the repository
+      # to be in lowercase.
+      GITHUB_REPOSITORY_NAME: ${{ steps.cache.outputs.GITHUB_REPOSITORY_NAME }}
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v2
 
-  #     - name: Set outputs
-  #       id: cache
-  #       run: |
-  #         echo "::set-output name=CACHE_KEY_BUILD::${{ hashFiles('.github/workflows/build/Dockerfile') }}"
-  #         echo "::set-output name=CACHE_KEY_LINT::${{ hashFiles('.github/workflows/lint/Dockerfile') }}"
-  #         # Convert the GitHub repository name to lowercase
-  #         echo "::set-output name=GITHUB_REPOSITORY_NAME::$(echo ${GITHUB_REPOSITORY,,})"
+      - name: Set outputs
+        id: cache
+        run: |
+          echo "::set-output name=CACHE_KEY_BUILD::${{ hashFiles('.github/workflows/build/Dockerfile') }}"
+          echo "::set-output name=CACHE_KEY_LINT::${{ hashFiles('.github/workflows/lint/Dockerfile') }}"
+          # Convert the GitHub repository name to lowercase
+          echo "::set-output name=GITHUB_REPOSITORY_NAME::$(echo ${GITHUB_REPOSITORY,,})"
 
   # build-image:
   #   # Reference to workflow-setup job is required to access its various outputs.
@@ -174,27 +174,28 @@ jobs:
   #     - name: flake8
   #       run: python3 -m flake8
 
-  # build_plenum_release:
-  #   name: Indy Plenum Release
-  #   needs: [workflow-setup, indy_plenum, indy_plenum_tests, lint]
-  #   runs-on: ubuntu-20.04
-  #   container:
-  #     image: ghcr.io/${{ needs.workflow-setup.outputs.GITHUB_REPOSITORY_NAME }}/plenum-build
-  #   strategy:
-  #     fail-fast: false
-  #   steps:
-  #     - name: Check out code
-  #       uses: actions/checkout@v1
+  build_plenum_release:
+    name: Indy Plenum Release
+    # needs: [workflow-setup, indy_plenum, indy_plenum_tests, lint]
+    needs: [workflow-setup]
+    runs-on: ubuntu-20.04
+    container:
+      image: ghcr.io/${{ needs.workflow-setup.outputs.GITHUB_REPOSITORY_NAME }}/plenum-build
+    strategy:
+      fail-fast: false
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v1
 
-  #     - name: Build Indy Plenum deployment package
-  #       run: |
-  #         mkdir -p /tmp/build-output
-  #         ./build-scripts/ubuntu-1604/build-indy-plenum.sh /__w/indy-plenum/indy-plenum 1.14.0 /tmp/build-output
+      - name: Build Indy Plenum deployment package
+        run: |
+          mkdir -p /tmp/build-output
+          ./build-scripts/ubuntu-1604/build-indy-plenum.sh /__w/indy-plenum/indy-plenum 1.14.0 /tmp/build-output
 
-  #     - uses: actions/upload-artifact@v2
-  #       with:
-  #         name: plenum-deb
-  #         path: /tmp/build-output
+      - uses: actions/upload-artifact@v2
+        with:
+          name: plenum-deb
+          path: /tmp/build-output
 
   # build_plenum_3rd_party_dependencies:
   #   name: Indy Plenum 3rd Party Dependencies
@@ -250,12 +251,21 @@ jobs:
     #needs: ['build_plenum_release', 'build_plenum_3rd_party_dependencies']
     # if: github.event_name == 'push' && github.ref == 'refs/heads/publishing-artifacts'
     steps:
-      - name: configure jfrog artifactory
+      - name: Setup JFrog CLI
         uses: jfrog/setup-jfrog-cli@v1
         env: 
           JF_ARTIFACTORY_1: ${{ secrets.INDY_ARTIFACTORY_REPO_CONFIG }}
-      - name: upload plenum
+      - name: Ping JFrog CLI
         run: |
           # Ping the server
           jfrog rt ping
+      - uses: actions/download-artifact@v2
+        with:
+          name: plenum-deb
+      - name: Display structure of downloaded files
+        run: ls -R
+
+      # - name: Upload Plenum Artifacts
+      #   run: |
+
           
