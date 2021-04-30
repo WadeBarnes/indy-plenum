@@ -252,21 +252,26 @@ jobs:
     needs: ['build_plenum_release']
     # if: github.event_name == 'push' && github.ref == 'refs/heads/publishing-artifacts'
     steps:
+      - name: Check out code
+        uses: actions/checkout@v1
+
       - name: Setup JFrog CLI
         uses: jfrog/setup-jfrog-cli@v1
         env: 
           JF_ARTIFACTORY_1: ${{ secrets.INDY_ARTIFACTORY_REPO_CONFIG }}
+
       - name: Ping JFrog CLI
         run: |
           # Ping the server
           jfrog rt ping
-      - uses: actions/download-artifact@v2
+
+      - name: Download Plenum Artifacts from Cache
+        uses: actions/download-artifact@v2
         with:
           name: plenum-deb
-      - name: Display structure of downloaded files
-        run: ls -R
+          path: to_publish
 
-      # - name: Upload Plenum Artifacts
-      #   run: |
-
+      - name: Upload Plenum Artifacts
+        run: |
+          jfrog rt u --deb xenial/stable/amd64 --spec .github/workflows/publish/upload-plenum-spec.json
           

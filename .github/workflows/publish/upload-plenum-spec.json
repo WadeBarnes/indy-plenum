@@ -1,0 +1,8 @@
+{
+    "files": [
+      {
+        "pattern": "to_publish/*.deb",
+        "target": "indy/pool/stable/i/indy-plenum/"
+      }]
+
+    }
