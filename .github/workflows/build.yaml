@@ -250,10 +250,11 @@ jobs:
     #needs: ['build_plenum_release', 'build_plenum_3rd_party_dependencies']
     # if: github.event_name == 'push' && github.ref == 'refs/heads/publishing-artifacts'
     steps:
-      - name: pub
+      - name: configure jfrog artifactory
         uses: jfrog/setup-jfrog-cli@v1
         env: 
           JF_ARTIFACTORY: ${{ secrets.INDY_ARTIFACTORY_REPO_CONFIG }}
+      - name: upload plenum
         run: |
           # Ping the server
           jfrog rt ping
