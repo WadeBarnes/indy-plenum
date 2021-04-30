@@ -253,7 +253,7 @@ jobs:
       - name: configure jfrog artifactory
         uses: jfrog/setup-jfrog-cli@v1
         env: 
-          JF_ARTIFACTORY: ${{ secrets.INDY_ARTIFACTORY_REPO_CONFIG }}
+          JF_ARTIFACTORY_1: ${{ secrets.INDY_ARTIFACTORY_REPO_CONFIG }}
       - name: upload plenum
         run: |
           # Ping the server
