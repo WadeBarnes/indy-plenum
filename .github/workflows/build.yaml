@@ -274,5 +274,7 @@ jobs:
 
       - name: Upload Plenum Artifacts
         run: |
+          # rename deb file for testing purposes
+          mv /home/runner/work/indy-plenum/indy-plenum/to_publish/indy-plenum_1.14.0_amd64.deb /home/runner/work/indy-plenum/indy-plenum/to_publish/indy-plenum_1.14.0_amd64_test.deb 
           jfrog rt u --deb xenial/stable/amd64 --spec .github/workflows/publish/upload-plenum-spec.json
           
