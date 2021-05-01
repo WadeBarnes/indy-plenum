@@ -1,0 +1,9 @@
+{
+    "files": [
+      {
+        "pattern": "/home/runner/tmp/cache/*.deb",
+        "target": "indy/pool/stable/i/indy-plenum/"
+      }]
+
+    }
+    
