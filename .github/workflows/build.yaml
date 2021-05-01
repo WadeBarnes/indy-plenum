@@ -25,34 +25,34 @@ jobs:
           # Convert the GitHub repository name to lowercase
           echo "::set-output name=GITHUB_REPOSITORY_NAME::$(echo ${GITHUB_REPOSITORY,,})"
 
-  build-image:
-    # Reference to workflow-setup job is required to access its various outputs.
-    needs: workflow-setup
-    runs-on: ubuntu-latest
-    env:
-      DOCKER_BUILDKIT: 1
-      CACHE_KEY_BUILD: ${{ needs.workflow-setup.outputs.CACHE_KEY_BUILD }}
-      GITHUB_REPOSITORY_NAME: ${{ needs.workflow-setup.outputs.GITHUB_REPOSITORY_NAME }}
-    steps:
-      - name: Git checkout
-        uses: actions/checkout@v2
+  # build-image:
+  #   # Reference to workflow-setup job is required to access its various outputs.
+  #   needs: workflow-setup
+  #   runs-on: ubuntu-latest
+  #   env:
+  #     DOCKER_BUILDKIT: 1
+  #     CACHE_KEY_BUILD: ${{ needs.workflow-setup.outputs.CACHE_KEY_BUILD }}
+  #     GITHUB_REPOSITORY_NAME: ${{ needs.workflow-setup.outputs.GITHUB_REPOSITORY_NAME }}
+  #   steps:
+  #     - name: Git checkout
+  #       uses: actions/checkout@v2
 
-      - name: Try load from cache.
-        id: cache-image
-        uses: actions/cache@v2
-        with:
-          path: ${GITHUB_WORKSPACE}/cache
-          key: ${{ env.CACHE_KEY_BUILD}}
+  #     - name: Try load from cache.
+  #       id: cache-image
+  #       uses: actions/cache@v2
+  #       with:
+  #         path: ${GITHUB_WORKSPACE}/cache
+  #         key: ${{ env.CACHE_KEY_BUILD}}
 
-      - name: If NOT found in cache, build and push image.
-        if: steps.cache-image.outputs.cache-hit != 'true'
-        run: |
-          echo ${{ secrets.CR_PAT }} | docker login ghcr.io --username ${{ secrets.CR_USER }} --password-stdin
-          docker build -f .github/workflows/build/Dockerfile --no-cache -t ${{ env.GITHUB_REPOSITORY_NAME }}/plenum-build:${{ env.CACHE_KEY_BUILD }} .
-          docker tag ${{ env.GITHUB_REPOSITORY_NAME }}/plenum-build:${{ env.CACHE_KEY_BUILD }} ghcr.io/${{ env.GITHUB_REPOSITORY_NAME }}/plenum-build:latest
-          docker push ghcr.io/${{ env.GITHUB_REPOSITORY_NAME }}/plenum-build:latest
-          mkdir -p ${GITHUB_WORKSPACE}/cache
-          touch ${GITHUB_WORKSPACE}/cache/${{ env.CACHE_KEY_BUILD }}
+  #     - name: If NOT found in cache, build and push image.
+  #       if: steps.cache-image.outputs.cache-hit != 'true'
+  #       run: |
+  #         echo ${{ secrets.CR_PAT }} | docker login ghcr.io --username ${{ secrets.CR_USER }} --password-stdin
+  #         docker build -f .github/workflows/build/Dockerfile --no-cache -t ${{ env.GITHUB_REPOSITORY_NAME }}/plenum-build:${{ env.CACHE_KEY_BUILD }} .
+  #         docker tag ${{ env.GITHUB_REPOSITORY_NAME }}/plenum-build:${{ env.CACHE_KEY_BUILD }} ghcr.io/${{ env.GITHUB_REPOSITORY_NAME }}/plenum-build:latest
+  #         docker push ghcr.io/${{ env.GITHUB_REPOSITORY_NAME }}/plenum-build:latest
+  #         mkdir -p ${GITHUB_WORKSPACE}/cache
+  #         touch ${GITHUB_WORKSPACE}/cache/${{ env.CACHE_KEY_BUILD }}
 
   # lint-image:
   #   # Reference to workflow-setup job is required to access its various outputs.
@@ -177,7 +177,7 @@ jobs:
   build_plenum_release:
     name: Indy Plenum Release
     # needs: [workflow-setup, indy_plenum, indy_plenum_tests, lint]
-    needs: [workflow-setup, build-image]
+    needs: [workflow-setup]
     runs-on: ubuntu-20.04
     container:
       image: ghcr.io/${{ needs.workflow-setup.outputs.GITHUB_REPOSITORY_NAME }}/plenum-build
@@ -200,7 +200,7 @@ jobs:
   build_plenum_3rd_party_dependencies:
     name: Indy Plenum 3rd Party Dependencies
     # needs: [workflow-setup, indy_plenum, indy_plenum_tests, lint]
-    needs: [workflow-setup, build-image]
+    needs: [workflow-setup]
     runs-on: ubuntu-20.04
     container:
       image: ghcr.io/${{ needs.workflow-setup.outputs.GITHUB_REPOSITORY_NAME }}/plenum-build
@@ -281,65 +281,13 @@ jobs:
         id: third-party-dependencies
         uses: actions/cache@v2
         with:
-          path: to_publish/third-party-artifacts
-          key: third-party-dependencies-test-${{ hashFiles('./build-scripts/ubuntu-1604/build-3rd-parties.sh') }}
-          restore-keys: |
-            third-party-dependencies-
-            *
-      
-      - name: Upload 3rd Party Artifacts
-        # if: steps.third-party-artifacts.outputs.cache-hit != 'true'
-        run: |
-          ls -R /tmp/cache
-          ls -R /home/runner/work/indy-plenum/indy-plenum/to_publish/
-          
-  publish_plenum_release_tmp:
-    name: Publish release tmp
-    runs-on: ubuntu-20.04
-    needs: ['build_plenum_release', 'build_plenum_3rd_party_dependencies']
-    # needs: ['build_plenum_release']
-    # if: github.event_name == 'push' && github.ref == 'refs/heads/publishing-artifacts'
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v1
-
-      - name: Setup JFrog CLI
-        uses: jfrog/setup-jfrog-cli@v1
-        env: 
-          JF_ARTIFACTORY_1: ${{ secrets.INDY_ARTIFACTORY_REPO_CONFIG }}
-          JFROG_CLI_LOG_LEVEL: "DEBUG"
-
-      - name: Ping JFrog CLI
-        run: |
-          # Ping the server
-          jfrog rt ping
-
-      # - name: Download Plenum Artifacts from Cache
-      #   uses: actions/download-artifact@v2
-      #   with:
-      #     name: plenum-deb
-      #     path: to_publish
-
-      # - name: Upload Plenum Artifacts
-      #   run: |
-      #     jfrog rt u --deb xenial/stable/amd64 --spec .github/workflows/publish/upload-plenum-spec.json
-
-      - name: Load 3rd Party Artifacts from cache
-        id: third-party-dependencies
-        uses: actions/cache@v2
-        with:
           path: /tmp/cache
           key: third-party-dependencies-test-${{ hashFiles('./build-scripts/ubuntu-1604/build-3rd-parties.sh') }}
           restore-keys: |
             third-party-dependencies-
-            *
       
       - name: Upload 3rd Party Artifacts
         # if: steps.third-party-artifacts.outputs.cache-hit != 'true'
         run: |
-          ls -R /tmp/cache
-          ls -R /home/runner/work/indy-plenum/indy-plenum/to_publish/
-            
-
-
-          
+          ls -R 
+   
