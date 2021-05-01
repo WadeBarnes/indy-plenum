@@ -197,32 +197,33 @@ jobs:
           name: plenum-deb
           path: /tmp/build-output
 
-  # build_plenum_3rd_party_dependencies:
-  #   name: Indy Plenum 3rd Party Dependencies
-  #   needs: [workflow-setup, indy_plenum, indy_plenum_tests, lint]
-  #   runs-on: ubuntu-20.04
-  #   container:
-  #     image: ghcr.io/${{ needs.workflow-setup.outputs.GITHUB_REPOSITORY_NAME }}/plenum-build
-  #   strategy:
-  #     fail-fast: false
-  #   steps:
-  #     - name: Check out code
-  #       uses: actions/checkout@v1
+  build_plenum_3rd_party_dependencies:
+    name: Indy Plenum 3rd Party Dependencies
+    # needs: [workflow-setup, indy_plenum, indy_plenum_tests, lint]
+    needs: [workflow-setup]
+    runs-on: ubuntu-20.04
+    container:
+      image: ghcr.io/${{ needs.workflow-setup.outputs.GITHUB_REPOSITORY_NAME }}/plenum-build
+    strategy:
+      fail-fast: false
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v1
 
-  #     - name: Try load from cache.
-  #       id: third-party-dependencies
-  #       uses: actions/cache@v2
-  #       with:
-  #         path: /tmp/cache
-  #         key: ${{ hashFiles('./build-scripts/ubuntu-1604/build-3rd-parties.sh') }}
+      - name: Try load from cache.
+        id: third-party-dependencies
+        uses: actions/cache@v2
+        with:
+          path: /tmp/cache
+          key: ${{ hashFiles('./build-scripts/ubuntu-1604/build-3rd-parties.sh') }}
 
-  #     - name: Build 3rd party deployment packages
-  #       if: steps.third-party-dependencies.outputs.cache-hit != 'true'
-  #       run: |
-  #         mkdir -p ./build-scripts/ubuntu-1604/cache/3rd-party-dependencies/  
-  #         ./build-scripts/ubuntu-1604/build-3rd-parties.sh ./cache/3rd-party-dependencies
-  #         cd ./build-scripts/ubuntu-1604
-  #         mv ./cache/* /tmp/cache
+      - name: Build 3rd party deployment packages
+        if: steps.third-party-dependencies.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p ./build-scripts/ubuntu-1604/cache/3rd-party-dependencies/  
+          ./build-scripts/ubuntu-1604/build-3rd-parties.sh ./cache/3rd-party-dependencies
+          cd ./build-scripts/ubuntu-1604
+          mv ./cache/* /tmp/cache
       
 
   # publish_plenum_rc:
@@ -248,8 +249,8 @@ jobs:
   publish_plenum_release:
     name: Publish release
     runs-on: ubuntu-20.04
-    # needs: ['build_plenum_release', 'build_plenum_3rd_party_dependencies']
-    needs: ['build_plenum_release']
+    needs: ['build_plenum_release', 'build_plenum_3rd_party_dependencies']
+    # needs: ['build_plenum_release']
     # if: github.event_name == 'push' && github.ref == 'refs/heads/publishing-artifacts'
     steps:
       - name: Check out code
@@ -266,15 +267,29 @@ jobs:
           # Ping the server
           jfrog rt ping
 
-      - name: Download Plenum Artifacts from Cache
-        uses: actions/download-artifact@v2
-        with:
-          name: plenum-deb
-          path: to_publish
+      # - name: Download Plenum Artifacts from Cache
+      #   uses: actions/download-artifact@v2
+      #   with:
+      #     name: plenum-deb
+      #     path: to_publish
 
-      - name: Upload Plenum Artifacts
+      # - name: Upload Plenum Artifacts
+      #   run: |
+      #     jfrog rt u --deb xenial/stable/amd64 --spec .github/workflows/publish/upload-plenum-spec.json
+
+      - name: Try load from cache.
+        id: third-party-dependencies
+        uses: actions/cache@v2
+        with:
+          path: /tmp/cache
+          key: ${{ hashFiles('./build-scripts/ubuntu-1604/build-3rd-parties.sh') }}
+      
+      - name: Upload 3rd Party Artifacts
+        if: steps.third-party-dependencies.outputs.cache-hit != 'true'
         run: |
-          # rename deb file for testing purposes
-          mv /home/runner/work/indy-plenum/indy-plenum/to_publish/indy-plenum_1.14.0_amd64.deb /home/runner/work/indy-plenum/indy-plenum/to_publish/indy-plenum_1.14.0_amd64_test.deb 
-          jfrog rt u --deb xenial/stable/amd64 --spec .github/workflows/publish/upload-plenum-spec.json
+          ls -R
+          ls -R /tmp/path
+          
+
+
           
