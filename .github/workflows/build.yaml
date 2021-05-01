@@ -287,10 +287,9 @@ jobs:
             third-party-dependencies-
       
       - name: Upload 3rd Party Artifacts
-        if: steps.third-party-artifacts.outputs.cache-hit == 'true'
+        # if: steps.third-party-artifacts.outputs.cache-hit == 'true'
         run: |
-          find /home -type f -iname "*.deb"
-          jfrog rt u --deb xenial/stable/amd64 --spec .github/workflows/publish/upload-3rd-parties-spec
+          jfrog rt u --deb xenial/stable/amd64 --spec .github/workflows/publish/upload-3rd-parties-spec.json
 
 
    
