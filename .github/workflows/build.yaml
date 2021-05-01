@@ -215,7 +215,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: /tmp/cache
-          key: ${{ hashFiles('./build-scripts/ubuntu-1604/build-3rd-parties.sh') }}
+          key: third-party-dependencies-{{ hashFiles('./build-scripts/ubuntu-1604/build-3rd-parties.sh') }}
 
       - name: Build 3rd party deployment packages
         # if: steps.third-party-dependencies.outputs.cache-hit != 'true'
@@ -224,7 +224,6 @@ jobs:
           ./build-scripts/ubuntu-1604/build-3rd-parties.sh ./cache/3rd-party-dependencies
           cd ./build-scripts/ubuntu-1604
           mv ./cache/* /tmp/cache
-      
 
   # publish_plenum_rc:
   #   name: Publish release candidate
@@ -281,13 +280,15 @@ jobs:
         id: third-party-dependencies
         uses: actions/cache@v2
         with:
-          path: /tmp/cache
-          key: ${{ hashFiles('./build-scripts/ubuntu-1604/build-3rd-parties.sh') }}
+          path: to_publish/third-party-artifacts
+          key: third-party-dependencies-{{ hashFiles('./build-scripts/ubuntu-1604/build-3rd-parties.sh') }}
+          restore-keys: |
+            third-party-dependencies-
       
       - name: Upload 3rd Party Artifacts
-        if: steps.third-party-dependencies.outputs.cache-hit != 'true'
+        # if: steps.third-party-dependencies.outputs.cache-hit != 'true'
         run: |
-          ls -R /tmp/cache
+          ls -R /home/runner/work/indy-plenum/indy-plenum/to_publish/
           ls -R
           
 
