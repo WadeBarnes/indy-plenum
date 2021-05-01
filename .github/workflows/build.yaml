@@ -289,6 +289,5 @@ jobs:
       - name: Upload 3rd Party Artifacts
         # if: steps.third-party-artifacts.outputs.cache-hit != 'true'
         run: |
-          ls -R 
-          find . -type f -name \*.deb
+          find /home -type f -iname "*.deb"
    
