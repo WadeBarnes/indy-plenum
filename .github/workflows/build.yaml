@@ -290,11 +290,56 @@ jobs:
       - name: Upload 3rd Party Artifacts
         # if: steps.third-party-artifacts.outputs.cache-hit != 'true'
         run: |
-          ls -R
           ls -R /tmp/cache
           ls -R /home/runner/work/indy-plenum/indy-plenum/to_publish/
           
-          
+publish_plenum_release_tmp:
+    name: Publish release tmp
+    runs-on: ubuntu-20.04
+    needs: ['build_plenum_release', 'build_plenum_3rd_party_dependencies']
+    # needs: ['build_plenum_release']
+    # if: github.event_name == 'push' && github.ref == 'refs/heads/publishing-artifacts'
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v1
+
+      - name: Setup JFrog CLI
+        uses: jfrog/setup-jfrog-cli@v1
+        env: 
+          JF_ARTIFACTORY_1: ${{ secrets.INDY_ARTIFACTORY_REPO_CONFIG }}
+          JFROG_CLI_LOG_LEVEL: "DEBUG"
+
+      - name: Ping JFrog CLI
+        run: |
+          # Ping the server
+          jfrog rt ping
+
+      # - name: Download Plenum Artifacts from Cache
+      #   uses: actions/download-artifact@v2
+      #   with:
+      #     name: plenum-deb
+      #     path: to_publish
+
+      # - name: Upload Plenum Artifacts
+      #   run: |
+      #     jfrog rt u --deb xenial/stable/amd64 --spec .github/workflows/publish/upload-plenum-spec.json
+
+      - name: Load 3rd Party Artifacts from cache
+        id: third-party-dependencies
+        uses: actions/cache@v2
+        with:
+          path: /tmp/cache
+          key: third-party-dependencies-test-${{ hashFiles('./build-scripts/ubuntu-1604/build-3rd-parties.sh') }}
+          restore-keys: |
+            third-party-dependencies-
+            *
+      
+      - name: Upload 3rd Party Artifacts
+        # if: steps.third-party-artifacts.outputs.cache-hit != 'true'
+        run: |
+          ls -R /tmp/cache
+          ls -R /home/runner/work/indy-plenum/indy-plenum/to_publish/
+            
 
 
           
