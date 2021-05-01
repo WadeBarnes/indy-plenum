@@ -293,7 +293,7 @@ jobs:
           ls -R /tmp/cache
           ls -R /home/runner/work/indy-plenum/indy-plenum/to_publish/
           
-publish_plenum_release_tmp:
+  publish_plenum_release_tmp:
     name: Publish release tmp
     runs-on: ubuntu-20.04
     needs: ['build_plenum_release', 'build_plenum_3rd_party_dependencies']
