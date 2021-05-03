@@ -2,7 +2,7 @@
     "files": [
       {
         "pattern": "/home/runner/work/indy-plenum/indy-plenum/to_publish/*.deb",
-        "target": "indy/pool/stable/i/indy-plenum/"
+        "target": "indy/pool/${RELEASE}/i/indy-plenum/"
       }]
 
     }
