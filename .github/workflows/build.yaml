@@ -197,18 +197,17 @@ jobs:
 
       - name: Build Indy Plenum deployment package
         run: |
-          mkdir -p /tmp/build-output
-          ./build-scripts/ubuntu-1604/build-indy-plenum.sh /__w/indy-plenum/indy-plenum 1.14.0 /tmp/build-output
+          mkdir -p /tmp/plenum-build
+          ./build-scripts/ubuntu-1604/build-indy-plenum.sh /__w/indy-plenum/indy-plenum 1.14.0 /tmp/plenum-build
 
       - uses: actions/upload-artifact@v2
         with:
           name: plenum-deb
-          path: /tmp/build-output
+          path: /tmp/plenum-build
 
   build_plenum_3rd_party_dependencies:
     name: Indy Plenum 3rd Party Dependencies
-    # needs: [workflow-setup, indy_plenum, indy_plenum_tests, lint]
-    needs: [workflow-setup]
+    needs: [workflow-setup, indy_plenum, indy_plenum_tests, lint]
     runs-on: ubuntu-20.04
     container:
       image: ghcr.io/${{ needs.workflow-setup.outputs.GITHUB_REPOSITORY_NAME }}/plenum-build
@@ -230,7 +229,7 @@ jobs:
         run: |
           mkdir -p ./build-scripts/ubuntu-1604/cache/3rd-party-dependencies/  
           ./build-scripts/ubuntu-1604/build-3rd-parties.sh ./cache/3rd-party-dependencies
-  #         mv ./build-scripts/ubuntu-1604/cache/* /tmp/third-party-dependencies
+          mv ./build-scripts/ubuntu-1604/cache/* /tmp/third-party-dependencies
 
 
   publish_plenum_release:
