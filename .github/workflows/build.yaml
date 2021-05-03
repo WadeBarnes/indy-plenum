@@ -236,7 +236,8 @@ jobs:
   publish_plenum_release:
     name: Publish release
     runs-on: ubuntu-20.04
-    needs: ['build_plenum_release', 'build_plenum_3rd_party_dependencies']
+    # needs: ['build_plenum_release', 'build_plenum_3rd_party_dependencies']
+    needs: publish_plenum_release_test
     env:
       GITHUB_REF: ${{ needs.workflow-setup.outputs.GITHUB_REF }}
     if: github.event_name == 'push' && ( github.ref  == 'refs/heads/publishing-artifacts' || github.ref  == 'refs/heads/master' || github.ref  == 'refs/heads/release*' )
@@ -255,28 +256,52 @@ jobs:
           # Ping the server
           jfrog rt ping
 
-      - name: Download Plenum Artifacts from Pipeline Artifacts
-        uses: actions/download-artifact@v2
-        with:
-          name: plenum-deb
-          path: to_publish
-
-      - name: Upload Plenum Artifacts
+      - name: Echo GITHUB_REF as env
         run: |
-          jfrog rt u --deb xenial/${{ env.GITHUB_REF }}/amd64 --spec .github/workflows/publish/upload-plenum-spec.json --spec-vars "RELEASE=${{ env.GITHUB_REF }}"
+          echo ${{ env.GITHUB_REF }} 
 
-      - name: Download 3rd Party Artifacts from Cache
-        id: third-party-dependencies
-        uses: actions/cache@v2
-        with:
-          path: /tmp/third-party-dependencies
-          key: third-party-dependencies-${{ hashFiles('./build-scripts/ubuntu-1604/build-3rd-parties.sh') }}
-          restore-keys: |
-            third-party-dependencies-
+      - name: Echo workflow-setup output
+        run: |
+          echo ${{ needs-workflow-setup.outputs.GITHUB_REF }}
+
+      # - name: Download Plenum Artifacts from Pipeline Artifacts
+      #   uses: actions/download-artifact@v2
+      #   with:
+      #     name: plenum-deb
+      #     path: to_publish
+
+      # - name: Upload Plenum Artifacts
+      #   run: |
+      #     jfrog rt u --deb xenial/${{ env.GITHUB_REF }}/amd64 --spec .github/workflows/publish/upload-plenum-spec.json --spec-vars "RELEASE=${{ env.GITHUB_REF }}"
+
+      # - name: Download 3rd Party Artifacts from Cache
+      #   id: third-party-dependencies
+      #   uses: actions/cache@v2
+      #   with:
+      #     path: /tmp/third-party-dependencies
+      #     key: third-party-dependencies-${{ hashFiles('./build-scripts/ubuntu-1604/build-3rd-parties.sh') }}
+      #     restore-keys: |
+      #       third-party-dependencies-
       
-      - name: Upload 3rd Party Artifacts
+      # - name: Upload 3rd Party Artifacts
+      #   run: |
+      #     jfrog rt u --deb xenial/${{ env.GITHUB_REF }}/amd64 --spec .github/workflows/publish/upload-3rd-parties-spec.json --spec-vars "RELEASE=${{ env.GITHUB_REF }}"
+
+  publish_plenum_release_test:
+    name: Publish release
+    runs-on: ubuntu-20.04
+    needs: ['workflow-setup', 'build_plenum_release', 'build_plenum_3rd_party_dependencies']
+    env:
+      GITHUB_REF: ${{ needs.workflow-setup.outputs.GITHUB_REF }}
+    if: github.event_name == 'push' && ( github.ref  == 'refs/heads/publishing-artifacts' || github.ref  == 'refs/heads/master' || github.ref  == 'refs/heads/release*' )
+    steps:
+      - name: Echo GITHUB_REF as env
         run: |
-          jfrog rt u --deb xenial/${{ env.GITHUB_REF }}/amd64 --spec .github/workflows/publish/upload-3rd-parties-spec.json --spec-vars "RELEASE=${{ env.GITHUB_REF }}"
+          echo ${{ env.GITHUB_REF }} 
+
+      - name: Echo workflow-setup output
+        run: |
+          echo ${{ needs-workflow-setup.outputs.GITHUB_REF }}
 
 
    
