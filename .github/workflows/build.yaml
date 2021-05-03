@@ -301,7 +301,7 @@ jobs:
     needs: ['build_plenum_release', 'build_plenum_3rd_party_dependencies']
     env:
       GITHUB_REF: ${{ needs.workflow-setup.outputs.GITHUB_REF }}
-    if: github.event_name == 'push' && ( github.ref  == 'refs/heads/publishing-artifacts' || github.ref  == 'refs/heads/master' || github.ref  == 'refs/heads/release*'} )
+    if: github.event_name == 'push' && ( github.ref  == 'refs/heads/publishing-artifacts' || github.ref  == 'refs/heads/master' || github.ref  == 'refs/heads/release*' )
     steps:
       - name: Check out code
         uses: actions/checkout@v1
