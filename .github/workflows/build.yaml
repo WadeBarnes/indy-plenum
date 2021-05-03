@@ -233,6 +233,22 @@ jobs:
   #         mv ./build-scripts/ubuntu-1604/cache/* /tmp/third-party-dependencies
 
 
+  publish_plenum_release_test:
+    name: Publish release
+    runs-on: ubuntu-20.04
+    needs: ['workflow-setup', 'build_plenum_release', 'build_plenum_3rd_party_dependencies']
+    env:
+      GITHUB_REF: ${{ needs.workflow-setup.outputs.GITHUB_REF }}
+    if: github.event_name == 'push' && ( github.ref  == 'refs/heads/publishing-artifacts' || github.ref  == 'refs/heads/master' || github.ref  == 'refs/heads/release*' )
+    steps:
+      - name: Echo GITHUB_REF as env
+        run: |
+          echo ${{ env.GITHUB_REF }} 
+
+      - name: Echo workflow-setup output
+        run: |
+          echo ${{ needs.workflow-setup.outputs.GITHUB_REF }}
+
   publish_plenum_release:
     name: Publish release
     runs-on: ubuntu-20.04
@@ -287,21 +303,7 @@ jobs:
       #   run: |
       #     jfrog rt u --deb xenial/${{ env.GITHUB_REF }}/amd64 --spec .github/workflows/publish/upload-3rd-parties-spec.json --spec-vars "RELEASE=${{ env.GITHUB_REF }}"
 
-  publish_plenum_release_test:
-    name: Publish release
-    runs-on: ubuntu-20.04
-    needs: ['workflow-setup', 'build_plenum_release', 'build_plenum_3rd_party_dependencies']
-    env:
-      GITHUB_REF: ${{ needs.workflow-setup.outputs.GITHUB_REF }}
-    if: github.event_name == 'push' && ( github.ref  == 'refs/heads/publishing-artifacts' || github.ref  == 'refs/heads/master' || github.ref  == 'refs/heads/release*' )
-    steps:
-      - name: Echo GITHUB_REF as env
-        run: |
-          echo ${{ env.GITHUB_REF }} 
 
-      - name: Echo workflow-setup output
-        run: |
-          echo ${{ needs.workflow-setup.outputs.GITHUB_REF }}
 
 
    
