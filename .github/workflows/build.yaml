@@ -252,48 +252,48 @@ jobs:
   #       uses: jfrog/setup-jfrog-cli@v1
   #       run: jfrog --version
 
-  publish_plenum_release:
-    name: Publish release
-    runs-on: ubuntu-20.04
-    needs: ['build_plenum_release', 'build_plenum_3rd_party_dependencies']
-    # if: github.event_name == 'push' && github.ref == 'refs/heads/publishing-artifacts'
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v1
+  # publish_plenum_release:
+  #   name: Publish release
+  #   runs-on: ubuntu-20.04
+  #   needs: ['build_plenum_release', 'build_plenum_3rd_party_dependencies']
+  #   # if: github.event_name == 'push' && github.ref == 'refs/heads/publishing-artifacts'
+  #   steps:
+  #     - name: Check out code
+  #       uses: actions/checkout@v1
 
-      - name: Setup JFrog CLI
-        uses: jfrog/setup-jfrog-cli@v1
-        env: 
-          JF_ARTIFACTORY_1: ${{ secrets.INDY_ARTIFACTORY_REPO_CONFIG }}
-          JFROG_CLI_LOG_LEVEL: "DEBUG"
+  #     - name: Setup JFrog CLI
+  #       uses: jfrog/setup-jfrog-cli@v1
+  #       env: 
+  #         JF_ARTIFACTORY_1: ${{ secrets.INDY_ARTIFACTORY_REPO_CONFIG }}
+  #         JFROG_CLI_LOG_LEVEL: "DEBUG"
 
-      - name: Ping JFrog CLI
-        run: |
-          # Ping the server
-          jfrog rt ping
+  #     - name: Ping JFrog CLI
+  #       run: |
+  #         # Ping the server
+  #         jfrog rt ping
 
-      - name: Download Plenum Artifacts from Pipeline Artifacts
-        uses: actions/download-artifact@v2
-        with:
-          name: plenum-deb
-          path: to_publish
+  #     - name: Download Plenum Artifacts from Pipeline Artifacts
+  #       uses: actions/download-artifact@v2
+  #       with:
+  #         name: plenum-debPublis
+  #         path: to_publish
 
-      - name: Upload Plenum Artifacts
-        run: |
-          jfrog rt u --deb xenial/stable/amd64 --spec .github/workflows/publish/upload-plenum-spec.json
+  #     - name: Upload Plenum Artifacts
+  #       run: |
+  #         jfrog rt u --deb xenial/stable/amd64 --spec .github/workflows/publish/upload-plenum-spec.json
 
-      - name: Download 3rd Party Artifacts from Cache
-        id: third-party-dependencies
-        uses: actions/cache@v2
-        with:
-          path: /tmp/third-party-dependencies
-          key: third-party-dependencies-${{ hashFiles('./build-scripts/ubuntu-1604/build-3rd-parties.sh') }}
-          restore-keys: |
-            third-party-dependencies-
+  #     - name: Download 3rd Party Artifacts from Cache
+  #       id: third-party-dependencies
+  #       uses: actions/cache@v2
+  #       with:
+  #         path: /tmp/third-party-dependencies
+  #         key: third-party-dependencies-${{ hashFiles('./build-scripts/ubuntu-1604/build-3rd-parties.sh') }}
+  #         restore-keys: |
+  #           third-party-dependencies-
       
-      - name: Upload 3rd Party Artifacts
-        run: |
-          jfrog rt u --deb xenial/stable/amd64 --spec .github/workflows/publish/upload-3rd-parties-spec.json
+  #     - name: Upload 3rd Party Artifacts
+  #       run: |
+  #         jfrog rt u --deb xenial/stable/amd64 --spec .github/workflows/publish/upload-3rd-parties-spec.json
 
   publish_plenum_release:
     name: Publish release
