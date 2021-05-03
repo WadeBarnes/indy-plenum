@@ -233,8 +233,8 @@ jobs:
           mv ./build-scripts/ubuntu-1604/cache/* /tmp/third-party-dependencies
 
 
-  publish_plenum_release:
-    name: Publish release
+  publish_plenum_artifacts:
+    name: Publish artifacts
     runs-on: ubuntu-20.04
     needs: ['workflow-setup', 'build_plenum_release', 'build_plenum_3rd_party_dependencies']
     env:
