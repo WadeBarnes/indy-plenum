@@ -301,7 +301,7 @@ jobs:
 
       - name: Echo workflow-setup output
         run: |
-          echo ${{ needs-workflow-setup.outputs.GITHUB_REF }}
+          echo ${{ needs.workflow-setup.outputs.GITHUB_REF }}
 
 
    
