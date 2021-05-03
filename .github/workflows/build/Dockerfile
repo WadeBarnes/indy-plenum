@@ -25,6 +25,3 @@ RUN apt-get update -y && apt-get install -y \
 RUN gem install --no-ri --no-rdoc rake fpm
 
 RUN indy_image_clean
-
-
-bash -c 'echo "deb https://hyperledger.jfrog.io/artifactory/indy/ xenial stable" >> /etc/apt/sources.list'
