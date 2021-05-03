@@ -184,7 +184,8 @@ jobs:
 
   build_plenum_release:
     name: Indy Plenum Release
-    needs: [workflow-setup, indy_plenum, indy_plenum_tests, lint]
+    # needs: [workflow-setup, indy_plenum, indy_plenum_tests, lint]
+    needs: [workflow-setup]
     runs-on: ubuntu-20.04
     container:
       image: ghcr.io/${{ needs.workflow-setup.outputs.GITHUB_REPOSITORY_NAME }}/plenum-build
@@ -235,8 +236,7 @@ jobs:
   publish_plenum_release:
     name: Publish release
     runs-on: ubuntu-20.04
-    # needs: ['workflow-setup', 'build_plenum_release', 'build_plenum_3rd_party_dependencies']
-    needs: workflow-setup
+    needs: ['workflow-setup', 'build_plenum_release', 'build_plenum_3rd_party_dependencies']
     env:
       GITHUB_REF: ${{ needs.workflow-setup.outputs.GITHUB_REF }}
     if: github.event_name == 'push' && ( github.ref  == 'refs/heads/publishing-artifacts' || github.ref  == 'refs/heads/master' || github.ref  == 'refs/heads/release*' )
