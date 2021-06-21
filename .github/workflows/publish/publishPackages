@@ -11,6 +11,8 @@ for packageName in ${fileList}; do
   packageShortName=$(echo "${packageName}" | sed -rn 's~^(python3-)?([^.]*)_.*.deb~\2~p')
   packageArchitecture=$(echo "${packageName}" | sed -rn 's~^.*_(.*).deb~\1~p')
   packageStartingLetter=$(echo "${packageShortName}" | sed -rn 's~^(.).*~\1~p')
+
+  echo "====================================================================================================================="
   echo "packageName: ${packageName}"
   echo "packageShortName: ${packageShortName}"
   echo "packageArchitecture: ${packageArchitecture}"
@@ -18,10 +20,12 @@ for packageName in ${fileList}; do
   echo "release: ${release}"
   echo "uploadSpec: ${uploadSpec}"
   echo
-
+  echo "---------------------------------------------------------------------------------------------------------------------"
   jfrog rt u \
     --deb xenial/${release}/${packageArchitecture} \
     --spec ${uploadSpec}\
     --spec-vars "SOURCE_DIR=${sourceDirectory};PACKAGE_NAME=${packageName};RELEASE=${release};PACKAGE_STARTING_LETTER=${packageStartingLetter};PACKAGE_SHORT_NAME=${packageShortName}" \
     --detailed-summary
+  echo "====================================================================================================================="
+  echo
 done
