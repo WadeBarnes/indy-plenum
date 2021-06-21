@@ -265,7 +265,7 @@ jobs:
 
       - name: Upload Plenum Artifacts
         run: |
-          .github/workflows/publish/publishPackages /home/runner/work/indy-plenum/indy-plenum/to_publish ${{ env.GITHUB_REF }}
+          .github/workflows/publish/publishPackages "/home/runner/work/indy-plenum/indy-plenum/to_publish" "${{ env.GITHUB_REF }}"
 
       - name: Download 3rd Party Artifacts from Cache
         id: third-party-dependencies
@@ -278,4 +278,4 @@ jobs:
 
       - name: Upload 3rd Party Artifacts
         run: |
-          .github/workflows/publish/publishPackages /home/runner/tmp/third-party-dependencies ${{ env.GITHUB_REF }}
+          .github/workflows/publish/publishPackages "/home/runner/tmp/third-party-dependencies" "${{ env.GITHUB_REF }}"

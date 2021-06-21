@@ -2,11 +2,11 @@
 # export MSYS_NO_PATHCONV=1
 SCRIPT_HOME="$( cd "$( dirname "$0" )" && pwd )"
 
-sourceDirectory=${SOURCE_DIRECTORY:-${1}}
-release=${GITHUB_REF:-${2}}
+sourceDirectory=${1}
+release=${2}
 uploadSpec=${UPLOAD_SPEC:-${3:-"${SCRIPT_HOME}/upload-spec.json"}}
 
-fileList=$(ls ${sourceDirectory} *.deb)
+fileList=$(ls "${sourceDirectory}" '*.deb')
 for packageName in ${fileList}; do
   packageShortName=$(echo "${packageName}" | sed -rn 's~^(python3-)?([^.]*)_.*.deb~\2~p')
   packageArchitecture=$(echo "${packageName}" | sed -rn 's~^.*_(.*).deb~\1~p')
