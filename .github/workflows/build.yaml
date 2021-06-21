@@ -228,7 +228,7 @@ jobs:
       - name: Build 3rd party deployment packages
         if: steps.third-party-dependencies.outputs.cache-hit != 'true'
         run: |
-          mkdir -p ./build-scripts/ubuntu-1604/cache/3rd-party-dependencies/  
+          mkdir -p ./build-scripts/ubuntu-1604/cache/3rd-party-dependencies/
           ./build-scripts/ubuntu-1604/build-3rd-parties.sh ./cache/3rd-party-dependencies
           mv ./build-scripts/ubuntu-1604/cache/* /tmp/third-party-dependencies
 
@@ -246,7 +246,7 @@ jobs:
 
       - name: Setup JFrog CLI
         uses: jfrog/setup-jfrog-cli@v1
-        env: 
+        env:
           JF_ARTIFACTORY_1: ${{ secrets.INDY_ARTIFACTORY_REPO_CONFIG }}
 
       - name: Ping JFrog server
@@ -262,7 +262,7 @@ jobs:
 
       - name: Upload Plenum Artifacts
         run: |
-          jfrog rt u --deb xenial/${{ env.GITHUB_REF }}/amd64 --spec .github/workflows/publish/upload-plenum-spec.json --spec-vars "RELEASE=${{ env.GITHUB_REF }}"
+          .github/workflows/publish/publishPackages /home/runner/work/indy-plenum/indy-plenum/to_publish ${{ env.GITHUB_REF }}
 
       - name: Download 3rd Party Artifacts from Cache
         id: third-party-dependencies
@@ -272,15 +272,7 @@ jobs:
           key: third-party-dependencies-${{ hashFiles('./build-scripts/ubuntu-1604/build-3rd-parties.sh') }}
           restore-keys: |
             third-party-dependencies-
-      
+
       - name: Upload 3rd Party Artifacts
         run: |
-          jfrog rt u --deb xenial/${{ env.GITHUB_REF }}/amd64 --spec .github/workflows/publish/upload-3rd-parties-spec.json --spec-vars "RELEASE=${{ env.GITHUB_REF }}"
-
-
-
-
-   
-
-
-   
+          .github/workflows/publish/publishPackages /home/runner/tmp/third-party-dependencies ${{ env.GITHUB_REF }}

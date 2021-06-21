@@ -1,0 +1,27 @@
+#!/bin/bash
+# export MSYS_NO_PATHCONV=1
+SCRIPT_HOME="$( cd "$( dirname "$0" )" && pwd )"
+
+sourceDirectory=${SOURCE_DIRECTORY:-${1}}
+release=${GITHUB_REF:-${2}}
+uploadSpec=${UPLOAD_SPEC:-${3:-"${SCRIPT_HOME}/upload-spec.json"}}
+
+fileList=$(ls ${sourceDirectory} *.deb)
+for packageName in ${fileList}; do
+  packageShortName=$(echo "${packageName}" | sed -rn 's~^(python3-)?([^.]*)_.*.deb~\2~p')
+  packageArchitecture=$(echo "${packageName}" | sed -rn 's~^.*_(.*).deb~\1~p')
+  packageStartingLetter=$(echo "${packageShortName}" | sed -rn 's~^(.).*~\1~p')
+  echo "packageName: ${packageName}"
+  echo "packageShortName: ${packageShortName}"
+  echo "packageArchitecture: ${packageArchitecture}"
+  echo "packageStartingLetter: ${packageStartingLetter}"
+  echo "release: ${release}"
+  echo "uploadSpec: ${uploadSpec}"
+  echo
+
+  jfrog rt u \
+    --deb xenial/${release}/${packageArchitecture} \
+    --spec ${uploadSpec}\
+    --spec-vars "SOURCE_DIR=${sourceDirectory};PACKAGE_NAME=${packageName};RELEASE=${release};PACKAGE_STARTING_LETTER=${packageStartingLetter};PACKAGE_SHORT_NAME=${packageShortName}" \
+    --detailed-summary
+done
