@@ -6,6 +6,7 @@ release=${2}
 uploadSpec=${UPLOAD_SPEC:-${3:-"${SCRIPT_HOME}/upload-spec.json"}}
 
 export JFROG_CLI_LOG_LEVEL=DEBUG
+export CI=true
 
 fileList=$(find "${sourceDirectory}" -type f -name '*.deb' -mindepth 1 -maxdepth 1 -printf "%f\n" 2>/dev/null)
 for packageName in ${fileList}; do
