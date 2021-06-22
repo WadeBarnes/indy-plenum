@@ -1,12 +1,11 @@
 #!/bin/bash
-# export MSYS_NO_PATHCONV=1
 SCRIPT_HOME="$( cd "$( dirname "$0" )" && pwd )"
 
 sourceDirectory=${1}
 release=${2}
 uploadSpec=${UPLOAD_SPEC:-${3:-"${SCRIPT_HOME}/upload-spec.json"}}
 
-fileList=$(ls "${sourceDirectory}" '*.deb')
+fileList=$(find "${sourceDirectory}" -type f -name '*.deb' -mindepth 1 -maxdepth 1 2>/dev/null)
 for packageName in ${fileList}; do
   packageShortName=$(echo "${packageName}" | sed -rn 's~^(python3-)?([^.]*)_.*.deb~\2~p')
   packageArchitecture=$(echo "${packageName}" | sed -rn 's~^.*_(.*).deb~\1~p')
@@ -19,7 +18,6 @@ for packageName in ${fileList}; do
   echo "packageStartingLetter: ${packageStartingLetter}"
   echo "release: ${release}"
   echo "uploadSpec: ${uploadSpec}"
-  echo
   echo "---------------------------------------------------------------------------------------------------------------------"
   jfrog rt u \
     --deb xenial/${release}/${packageArchitecture} \
