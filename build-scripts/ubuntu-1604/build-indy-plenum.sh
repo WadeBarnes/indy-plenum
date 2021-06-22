@@ -21,6 +21,7 @@ sed -i 's/{package_name}/'${PACKAGE_NAME}'/' "prerm"
 
 fpm --input-type "python" \
     --output-type "deb" \
+    --deb-no-changelog \
     --architecture "amd64" \
     --depends "python3-pyzmq (= 18.1.0)" \
     --verbose \
