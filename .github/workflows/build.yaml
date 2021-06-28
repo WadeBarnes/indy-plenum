@@ -14,6 +14,8 @@ jobs:
       # to be in lowercase.
       GITHUB_REPOSITORY_NAME: ${{ steps.cache.outputs.GITHUB_REPOSITORY_NAME }}
       GITHUB_REF: ${{ steps.cache.outputs.GITHUB_REF }}
+      isDev: ${{ steps.build-flags.outputs.isDev }}
+      isRC: ${{ steps.build-flags.outputs.isRC }}
     steps:
       - name: Git checkout
         uses: actions/checkout@v2
@@ -34,7 +36,23 @@ jobs:
             echo "::set-output name=GITHUB_REF::stable"
           else
             echo "::set-output name=GITHUB_REF::dev"
-          fi 
+          fi
+
+      - name: Set build flags
+        id: build-flags
+        run: |
+
+          if [[ "${{steps.cache.outputs.GITHUB_REF}}" == "dev" || "${{steps.cache.outputs.GITHUB_REF}}" == "master" ]]; then
+            echo "::set-output name=isDev::true"
+          else
+            echo "::set-output name=isDev::false"
+          fi
+
+          if [[ "${{steps.cache.outputs.GITHUB_REF}}" == "rc" ]]; then
+            echo "::set-output name=isRC::true"
+          else
+            echo "::set-output name=isRC::false"
+          fi
 
   # build-image:
   #   # Reference to workflow-setup job is required to access its various outputs.
@@ -198,49 +216,67 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v1
 
+      - name: Set Build Version
+        id: version
+        uses: ./.github/actions/set-version
+        with:
+          moduleName: plenum
+          isDev: ${{ needs.workflow-setup.outputs.isDev }}
+          isRC: ${{ needs.workflow-setup.outputs.isRC }}
+
+      # - name: Echo Build Version
+      #   run: |
+      #     echo "================================================================"
+      #     echo "Version:"
+      #     echo "----------------------------------------------------------------"
+      #     echo "targetReleaseVer: ${{ steps.version.outputs.targetReleaseVer }}"
+      #     echo "upstreamVer: ${{ steps.version.outputs.upstreamVer }}"
+      #     echo "pkgVer: ${{ steps.version.outputs.pkgVer }}"
+      #     echo "================================================================"
+
       - name: Build Indy Plenum deployment package
         run: |
           mkdir -p /tmp/plenum-build
-          ./build-scripts/ubuntu-1604/build-indy-plenum.sh /__w/indy-plenum/indy-plenum 1.14.0 /tmp/plenum-build
+          ./build-scripts/ubuntu-1604/build-indy-plenum.sh "/__w/indy-plenum/indy-plenum" "${{ steps.version.outputs.upstreamVer }}" "/tmp/plenum-build" "${{ steps.version.outputs.pkgVer }}"
 
       - uses: actions/upload-artifact@v2
         with:
           name: plenum-deb
           path: /tmp/plenum-build
 
-  build_plenum_3rd_party_dependencies:
-    name: Indy Plenum 3rd Party Dependencies
-    # needs: [workflow-setup, indy_plenum, indy_plenum_tests, lint]
-    needs: [workflow-setup]
-    runs-on: ubuntu-20.04
-    container:
-      image: ghcr.io/${{ needs.workflow-setup.outputs.GITHUB_REPOSITORY_NAME }}/plenum-build
-    strategy:
-      fail-fast: false
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v1
+  # build_plenum_3rd_party_dependencies:
+  #   name: Indy Plenum 3rd Party Dependencies
+  #   # needs: [workflow-setup, indy_plenum, indy_plenum_tests, lint]
+  #   needs: [workflow-setup]
+  #   runs-on: ubuntu-20.04
+  #   container:
+  #     image: ghcr.io/${{ needs.workflow-setup.outputs.GITHUB_REPOSITORY_NAME }}/plenum-build
+  #   strategy:
+  #     fail-fast: false
+  #   steps:
+  #     - name: Check out code
+  #       uses: actions/checkout@v1
 
-      - name: Try load from cache.
-        id: third-party-dependencies
-        uses: actions/cache@v2
-        with:
-          path: /tmp/third-party-dependencies
-          key: third-party-dependencies-${{ hashFiles('./build-scripts/ubuntu-1604/build-3rd-parties.sh') }}
+  #     - name: Try load from cache.
+  #       id: third-party-dependencies
+  #       uses: actions/cache@v2
+  #       with:
+  #         path: /tmp/third-party-dependencies
+  #         key: third-party-dependencies-${{ hashFiles('./build-scripts/ubuntu-1604/build-3rd-parties.sh') }}
 
-      - name: Build 3rd party deployment packages
-        if: steps.third-party-dependencies.outputs.cache-hit != 'true'
-        run: |
-          mkdir -p ./build-scripts/ubuntu-1604/cache/3rd-party-dependencies/
-          ./build-scripts/ubuntu-1604/build-3rd-parties.sh ./cache/3rd-party-dependencies
-          mv ./build-scripts/ubuntu-1604/cache/* /tmp/third-party-dependencies
+  #     - name: Build 3rd party deployment packages
+  #       if: steps.third-party-dependencies.outputs.cache-hit != 'true'
+  #       run: |
+  #         mkdir -p ./build-scripts/ubuntu-1604/cache/3rd-party-dependencies/
+  #         ./build-scripts/ubuntu-1604/build-3rd-parties.sh ./cache/3rd-party-dependencies
+  #         mv ./build-scripts/ubuntu-1604/cache/* /tmp/third-party-dependencies
 
 
   publish_plenum_artifacts:
     name: Publish artifacts
     runs-on: ubuntu-20.04
-    needs: ['workflow-setup', 'build_plenum_release', 'build_plenum_3rd_party_dependencies']
-    # needs: ['workflow-setup', 'build_plenum_release']
+    # needs: ['workflow-setup', 'build_plenum_release', 'build_plenum_3rd_party_dependencies']
+    needs: ['workflow-setup', 'build_plenum_release']
     env:
       GITHUB_REF: ${{ needs.workflow-setup.outputs.GITHUB_REF }}
     if: github.event_name == 'push' && ( github.ref  == 'refs/heads/publishing-artifacts' || github.ref  == 'refs/heads/master' || github.ref  == 'refs/heads/release*' || github.ref  == 'refs/heads/stable' )
@@ -268,15 +304,15 @@ jobs:
         run: |
           .github/workflows/publish/publishPackages "/home/runner/work/indy-plenum/indy-plenum/to_publish" "${{ env.GITHUB_REF }}"
 
-      - name: Download 3rd Party Artifacts from Cache
-        id: third-party-dependencies
-        uses: actions/cache@v2
-        with:
-          path: /tmp/third-party-dependencies
-          key: third-party-dependencies-${{ hashFiles('./build-scripts/ubuntu-1604/build-3rd-parties.sh') }}
-          restore-keys: |
-            third-party-dependencies-
+      # - name: Download 3rd Party Artifacts from Cache
+      #   id: third-party-dependencies
+      #   uses: actions/cache@v2
+      #   with:
+      #     path: /tmp/third-party-dependencies
+      #     key: third-party-dependencies-${{ hashFiles('./build-scripts/ubuntu-1604/build-3rd-parties.sh') }}
+      #     restore-keys: |
+      #       third-party-dependencies-
 
-      - name: Upload 3rd Party Artifacts
-        run: |
-          .github/workflows/publish/publishPackages "/home/runner/tmp/third-party-dependencies" "${{ env.GITHUB_REF }}"
+      # - name: Upload 3rd Party Artifacts
+      #   run: |
+      #     .github/workflows/publish/publishPackages "/home/runner/tmp/third-party-dependencies" "${{ env.GITHUB_REF }}"
