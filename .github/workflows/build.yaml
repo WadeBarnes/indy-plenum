@@ -211,9 +211,9 @@ jobs:
           echo "================================================================"
           echo "Version:"
           echo "----------------------------------------------------------------"
-          echo "targetReleaseVer: ${{ steps.version.outputs.targetReleaseVer }}"
-          echo "upstreamVer: ${{ steps.version.outputs.upstreamVer }}"
-          echo "pkgVer: ${{ steps.version.outputs.pkgVer }}"
+          echo "targetReleaseVer: " ${{ steps.version.outputs.targetReleaseVer }}
+          echo "upstreamVer: " ${{ steps.version.outputs.upstreamVer }}
+          echo "pkgVer: " ${{ steps.version.outputs.pkgVer }}
           echo "================================================================"
 
       # - name: Build Indy Plenum deployment package
