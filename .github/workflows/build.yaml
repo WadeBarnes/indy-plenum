@@ -215,8 +215,8 @@ jobs:
         uses: ./.github/actions/set-release-version
         with:
           moduleName: plenum
-          isDev: ${{ workflow-setup.outputs.isDev }}
-          isRC: ${{ workflow-setup.outputs.isRC }}
+          isDev: ${{ needs.workflow-setup.outputs.isDev }}
+          isRC: ${{ needs.workflow-setup.outputs.isRC }}
 
       - name: Echo Indy Plenum Version
         run: |
