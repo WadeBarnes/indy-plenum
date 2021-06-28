@@ -34,7 +34,19 @@ jobs:
             echo "::set-output name=GITHUB_REF::stable"
           else
             echo "::set-output name=GITHUB_REF::dev"
-          fi 
+          fi
+
+          if [[ "${{steps.cache.outputs.GITHUB_REF}}" == "dev" || "${{steps.cache.outputs.GITHUB_REF}}" == "master" ]]; then
+            echo "::set-output name=isDev::true"
+          else
+            echo "::set-output name=isDev::false"
+          fi
+
+          if [[ "${{steps.cache.outputs.GITHUB_REF}}" == "rc" ]]; then
+            echo "::set-output name=isRC::true"
+          else
+            echo "::set-output name=isRC::false"
+          fi
 
   # build-image:
   #   # Reference to workflow-setup job is required to access its various outputs.
@@ -203,8 +215,8 @@ jobs:
         uses: ./.github/actions/set-release-version
         with:
           moduleName: plenum
-          isDev: ${{ (${{ needs.workflow-setup.outputs.GITHUB_REF }} == "dev" || ${{ needs.workflow-setup.outputs.GITHUB_REF }} == "master") }}
-          isRC: ${{ (${{ needs.workflow-setup.outputs.GITHUB_REF }} == "rc") }}
+          isDev: ${{ workflow-setup.outputs.isDev }}
+          isRC: ${{ workflow-setup.outputs.isRC }}
 
       - name: Echo Indy Plenum Version
         run: |
