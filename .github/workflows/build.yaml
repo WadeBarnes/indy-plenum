@@ -14,6 +14,8 @@ jobs:
       # to be in lowercase.
       GITHUB_REPOSITORY_NAME: ${{ steps.cache.outputs.GITHUB_REPOSITORY_NAME }}
       GITHUB_REF: ${{ steps.cache.outputs.GITHUB_REF }}
+      isDev: ${{ steps.build-flags.outputs.isDev }}
+      isRC: ${{ steps.build-flags.outputs.isRC }}
     steps:
       - name: Git checkout
         uses: actions/checkout@v2
@@ -35,6 +37,10 @@ jobs:
           else
             echo "::set-output name=GITHUB_REF::dev"
           fi
+
+      - name: Set build flags
+        id: build-flags
+        run: |
 
           if [[ "${{steps.cache.outputs.GITHUB_REF}}" == "dev" || "${{steps.cache.outputs.GITHUB_REF}}" == "master" ]]; then
             echo "::set-output name=isDev::true"
