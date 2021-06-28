@@ -15,17 +15,7 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Setup JFrog CLI
-      uses: jfrog/setup-jfrog-cli@v1
-      env:
-        JF_ARTIFACTORY_1: ${{ secrets.INDY_ARTIFACTORY_REPO_CONFIG }}
-
-    - name: Ping JFrog server
-      run: |
-        jfrog rt ping
-
-    - name: Set Versions
-      id: versions
+    - name: Publish
       shell: bash
       run: |
         ${{ github.action_path }}/publishPackages "${{ inputs.sourceDirectory }}" "${{ inputs.distribution }}" "${{ inputs.component }}"

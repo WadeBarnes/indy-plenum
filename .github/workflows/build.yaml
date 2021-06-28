@@ -284,6 +284,16 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v1
 
+      - name: Setup JFrog CLI
+        uses: jfrog/setup-jfrog-cli@v1
+        env:
+          JF_ARTIFACTORY_1: ${{ secrets.INDY_ARTIFACTORY_REPO_CONFIG }}
+
+      - name: Ping JFrog server
+        run: |
+          # Ping the JFrog Artifactory server of Hyperledger
+          jfrog rt ping
+
       - name: Download Plenum Artifacts from Pipeline Artifacts
         uses: actions/download-artifact@v2
         with:
@@ -293,9 +303,10 @@ jobs:
       - name: Publish Plenum Artifacts
         uses: ./.github/actions/publish-deb
         with:
-          sourceDirectory: "/home/runner/work/indy-plenum/indy-plenum/to_publish"
+          sourceDirectory: /home/runner/work/indy-plenum/indy-plenum/to_publish
           distribution: xenial
           component: ${{ env.GITHUB_REF }}
+
 
       # - name: Download 3rd Party Artifacts from Cache
       #   id: third-party-dependencies
