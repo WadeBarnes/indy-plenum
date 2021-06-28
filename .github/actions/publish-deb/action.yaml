@@ -1,5 +1,7 @@
 name: "Publish Debian Packages"
-description: ""
+description: >
+  Publish debian packages to artifactory using the jfrog cli.
+  This action wraps a script that performs organized publishing of debian packages.
 
 inputs:
   sourceDirectory:
@@ -9,7 +11,7 @@ inputs:
     description: "The distribution supported by the package. i.e xenial, focal, etc."
     required: true
   component:
-    description: "The component type.  i.e. stable, rc, dev"
+    description: "The component type.  i.e. stable, rc, dev, etc."
     required: true
 
 runs:
