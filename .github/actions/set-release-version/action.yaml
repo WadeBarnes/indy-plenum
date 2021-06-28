@@ -15,18 +15,22 @@ inputs:
     required: true
     default: false
 
-# outputs:
-#   targetReleaseVer:
-#     description: "The target release version."
-#   upstreamVer:
-#     description: "The version number to use with Python packages."
-#   pkgVer:
-#     description: "The version number to use with Debian packages."
+outputs:
+  targetReleaseVer:
+    description: "The target release version."
+    value: ${{ steps.versions.outputs.targetReleaseVer }}
+  upstreamVer:
+    description: "The version number to use with Python packages."
+    value: ${{ steps.versions.outputs.upstreamVer }}
+  pkgVer:
+    description: "The version number to use with Debian packages."
+    value: ${{ steps.versions.outputs.pkgVer }}
 
 runs:
   using: "composite"
   steps:
     - name: Set Versions
+      id: versions
       shell: bash
       run: |
         fullVersion=$(python3 -c "from ${{ inputs.moduleName }} import load_version; print(load_version().full)")
@@ -50,9 +54,9 @@ runs:
         fi
 
         # Set Outputs ...
-        echo "::set-output name=targetReleaseVer::$(echo ${targetReleaseVer})"
-        echo "::set-output name=upstreamVer::$(echo ${upstreamVer})"
-        echo "::set-output name=pkgVer::$(echo ${pkgVer})"
+        echo "::set-output name=targetReleaseVer::${targetReleaseVer}"
+        echo "::set-output name=upstreamVer::${upstreamVer}"
+        echo "::set-output name=pkgVer::${pkgVer}"
 
         echo "Target Release version is : ${targetReleaseVer}"
         echo "PyPI Release version is : ${upstreamVer}"
