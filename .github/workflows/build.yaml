@@ -199,65 +199,21 @@ jobs:
         uses: actions/checkout@v1
 
       - name: Set Indy Plenum Version
-        shell: bash
+        id: version
+        uses: ./.github/actions/set-release-version
+        with:
+          moduleName: plenum
+          isDev: true
+          isRC: false
+
+      - name: Echo Indy Plenum Version
         run: |
           echo "================================================================"
-          echo "Workflow Build Info:"
+          echo "Version:"
           echo "----------------------------------------------------------------"
-          echo "github.run_id: ${{ github.run_id }}"
-          echo "github.run_number: ${{ github.run_number }}"
-          echo "github.sha: ${{ github.sha }}"
-          echo "================================================================"
-
-          isDev=1
-          moduleName=plenum
-          fullVersion=$(python3 -c "from ${moduleName} import load_version; print(load_version().full)")
-          release=$(python3 -c "from ${moduleName} import load_version; print(load_version().release)")
-          pre=$(python3 -c "from ${moduleName} import load_version; pre = load_version().parts[-2]; print('' if pre is None else pre)")
-          revision=$(python3 -c "from ${moduleName} import load_version; rev = load_version().parts[-1]; print('' if rev is None else rev)")
-
-          targetReleaseVer=${release}
-          upstreamVer=${targetReleaseVer}
-          pkgVer=${upstreamVer}
-
-          echo "================================================================"
-          echo "Before:"
-          echo "----------------------------------------------------------------"
-          echo "moduleName: ${moduleName}"
-          echo "fullVersion: ${fullVersion}"
-          echo "release: ${release}"
-          echo "pre: ${pre}"
-          echo "revision: ${revision}"
-          echo
-          echo "targetReleaseVer: ${targetReleaseVer}"
-          echo "upstreamVer: ${upstreamVer}"
-          echo "pkgVer: ${pkgVer}"
-          echo "================================================================"
-
-          if [ ! -z ${isDev} ]; then
-            rev=${{ github.run_number }}
-            upstreamVer+=".${pre}${rev}"
-            pkgVer+="~${pre}${rev}"
-          fi
-
-          ./bump_version.sh ${upstreamVer}
-
-          fullVersion=$(python3 -c "from ${moduleName} import load_version; print(load_version().full)")
-          release=$(python3 -c "from ${moduleName} import load_version; print(load_version().release)")
-          pre=$(python3 -c "from ${moduleName} import load_version; pre = load_version().parts[-2]; print('' if pre is None else pre)")
-          revision=$(python3 -c "from ${moduleName} import load_version; rev = load_version().parts[-1]; print('' if rev is None else rev)")
-          echo "================================================================"
-          echo "After:"
-          echo "----------------------------------------------------------------"
-          echo "moduleName: ${moduleName}"
-          echo "fullVersion: ${fullVersion}"
-          echo "release: ${release}"
-          echo "pre: ${pre}"
-          echo "revision: ${revision}"
-          echo
-          echo "targetReleaseVer: ${targetReleaseVer}"
-          echo "upstreamVer: ${upstreamVer}"
-          echo "pkgVer: ${pkgVer}"
+          echo "targetReleaseVer: ${{ steps.version.outputs.targetReleaseVer }}"
+          echo "upstreamVer: ${{ steps.version.outputs.upstreamVer }}"
+          echo "pkgVer: ${{ steps.version.outputs.pkgVer }}"
           echo "================================================================"
 
       # - name: Build Indy Plenum deployment package
