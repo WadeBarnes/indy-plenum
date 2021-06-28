@@ -198,85 +198,99 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v1
 
-      - name: Build Indy Plenum deployment package
+      - name: Set Indy Plenum Version
         run: |
-          mkdir -p /tmp/plenum-build
-          ./build-scripts/ubuntu-1604/build-indy-plenum.sh /__w/indy-plenum/indy-plenum 1.14.0 /tmp/plenum-build
+          moduleName=plenum
+          fullVersion=$(python3 -c "from ${moduleName} import load_version; print(load_version().full)")
+          release=$(python3 -c "from ${moduleName} import load_version; print(load_version().release)")
+          pre=$(python3 -c "from ${moduleName} import load_version; pre = load_version().parts[-2]; print('' if pre is None else pre)")
+          revision=$(python3 -c "from ${moduleName} import load_version; rev = load_version().parts[-1]; print('' if rev is None else rev)")
 
-      - uses: actions/upload-artifact@v2
-        with:
-          name: plenum-deb
-          path: /tmp/plenum-build
+          echo "moduleName: ${moduleName}"
+          echo "fullVersion: ${fullVersion}"
+          echo "release: ${release}"
+          echo "pre: ${pre}"
+          echo "revision: ${revision}"
 
-  build_plenum_3rd_party_dependencies:
-    name: Indy Plenum 3rd Party Dependencies
-    # needs: [workflow-setup, indy_plenum, indy_plenum_tests, lint]
-    needs: [workflow-setup]
-    runs-on: ubuntu-20.04
-    container:
-      image: ghcr.io/${{ needs.workflow-setup.outputs.GITHUB_REPOSITORY_NAME }}/plenum-build
-    strategy:
-      fail-fast: false
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v1
+      # - name: Build Indy Plenum deployment package
+      #   run: |
+      #     mkdir -p /tmp/plenum-build
+      #     ./build-scripts/ubuntu-1604/build-indy-plenum.sh /__w/indy-plenum/indy-plenum 1.14.0 /tmp/plenum-build
 
-      - name: Try load from cache.
-        id: third-party-dependencies
-        uses: actions/cache@v2
-        with:
-          path: /tmp/third-party-dependencies
-          key: third-party-dependencies-${{ hashFiles('./build-scripts/ubuntu-1604/build-3rd-parties.sh') }}
+      # - uses: actions/upload-artifact@v2
+      #   with:
+      #     name: plenum-deb
+      #     path: /tmp/plenum-build
 
-      - name: Build 3rd party deployment packages
-        if: steps.third-party-dependencies.outputs.cache-hit != 'true'
-        run: |
-          mkdir -p ./build-scripts/ubuntu-1604/cache/3rd-party-dependencies/
-          ./build-scripts/ubuntu-1604/build-3rd-parties.sh ./cache/3rd-party-dependencies
-          mv ./build-scripts/ubuntu-1604/cache/* /tmp/third-party-dependencies
+  # build_plenum_3rd_party_dependencies:
+  #   name: Indy Plenum 3rd Party Dependencies
+  #   # needs: [workflow-setup, indy_plenum, indy_plenum_tests, lint]
+  #   needs: [workflow-setup]
+  #   runs-on: ubuntu-20.04
+  #   container:
+  #     image: ghcr.io/${{ needs.workflow-setup.outputs.GITHUB_REPOSITORY_NAME }}/plenum-build
+  #   strategy:
+  #     fail-fast: false
+  #   steps:
+  #     - name: Check out code
+  #       uses: actions/checkout@v1
+
+  #     - name: Try load from cache.
+  #       id: third-party-dependencies
+  #       uses: actions/cache@v2
+  #       with:
+  #         path: /tmp/third-party-dependencies
+  #         key: third-party-dependencies-${{ hashFiles('./build-scripts/ubuntu-1604/build-3rd-parties.sh') }}
+
+  #     - name: Build 3rd party deployment packages
+  #       if: steps.third-party-dependencies.outputs.cache-hit != 'true'
+  #       run: |
+  #         mkdir -p ./build-scripts/ubuntu-1604/cache/3rd-party-dependencies/
+  #         ./build-scripts/ubuntu-1604/build-3rd-parties.sh ./cache/3rd-party-dependencies
+  #         mv ./build-scripts/ubuntu-1604/cache/* /tmp/third-party-dependencies
 
 
-  publish_plenum_artifacts:
-    name: Publish artifacts
-    runs-on: ubuntu-20.04
-    needs: ['workflow-setup', 'build_plenum_release', 'build_plenum_3rd_party_dependencies']
-    # needs: ['workflow-setup', 'build_plenum_release']
-    env:
-      GITHUB_REF: ${{ needs.workflow-setup.outputs.GITHUB_REF }}
-    if: github.event_name == 'push' && ( github.ref  == 'refs/heads/publishing-artifacts' || github.ref  == 'refs/heads/master' || github.ref  == 'refs/heads/release*' || github.ref  == 'refs/heads/stable' )
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v1
+  # publish_plenum_artifacts:
+  #   name: Publish artifacts
+  #   runs-on: ubuntu-20.04
+  #   needs: ['workflow-setup', 'build_plenum_release', 'build_plenum_3rd_party_dependencies']
+  #   # needs: ['workflow-setup', 'build_plenum_release']
+  #   env:
+  #     GITHUB_REF: ${{ needs.workflow-setup.outputs.GITHUB_REF }}
+  #   if: github.event_name == 'push' && ( github.ref  == 'refs/heads/publishing-artifacts' || github.ref  == 'refs/heads/master' || github.ref  == 'refs/heads/release*' || github.ref  == 'refs/heads/stable' )
+  #   steps:
+  #     - name: Check out code
+  #       uses: actions/checkout@v1
 
-      - name: Setup JFrog CLI
-        uses: jfrog/setup-jfrog-cli@v1
-        env:
-          JF_ARTIFACTORY_1: ${{ secrets.INDY_ARTIFACTORY_REPO_CONFIG }}
+  #     - name: Setup JFrog CLI
+  #       uses: jfrog/setup-jfrog-cli@v1
+  #       env:
+  #         JF_ARTIFACTORY_1: ${{ secrets.INDY_ARTIFACTORY_REPO_CONFIG }}
 
-      - name: Ping JFrog server
-        run: |
-          # Ping the JFrog Artifactory server of Hyperledger
-          jfrog rt ping
+  #     - name: Ping JFrog server
+  #       run: |
+  #         # Ping the JFrog Artifactory server of Hyperledger
+  #         jfrog rt ping
 
-      - name: Download Plenum Artifacts from Pipeline Artifacts
-        uses: actions/download-artifact@v2
-        with:
-          name: plenum-deb
-          path: to_publish
+  #     - name: Download Plenum Artifacts from Pipeline Artifacts
+  #       uses: actions/download-artifact@v2
+  #       with:
+  #         name: plenum-deb
+  #         path: to_publish
 
-      - name: Upload Plenum Artifacts
-        run: |
-          .github/workflows/publish/publishPackages "/home/runner/work/indy-plenum/indy-plenum/to_publish" "${{ env.GITHUB_REF }}"
+  #     - name: Upload Plenum Artifacts
+  #       run: |
+  #         .github/workflows/publish/publishPackages "/home/runner/work/indy-plenum/indy-plenum/to_publish" "${{ env.GITHUB_REF }}"
 
-      - name: Download 3rd Party Artifacts from Cache
-        id: third-party-dependencies
-        uses: actions/cache@v2
-        with:
-          path: /tmp/third-party-dependencies
-          key: third-party-dependencies-${{ hashFiles('./build-scripts/ubuntu-1604/build-3rd-parties.sh') }}
-          restore-keys: |
-            third-party-dependencies-
+  #     - name: Download 3rd Party Artifacts from Cache
+  #       id: third-party-dependencies
+  #       uses: actions/cache@v2
+  #       with:
+  #         path: /tmp/third-party-dependencies
+  #         key: third-party-dependencies-${{ hashFiles('./build-scripts/ubuntu-1604/build-3rd-parties.sh') }}
+  #         restore-keys: |
+  #           third-party-dependencies-
 
-      - name: Upload 3rd Party Artifacts
-        run: |
-          .github/workflows/publish/publishPackages "/home/runner/tmp/third-party-dependencies" "${{ env.GITHUB_REF }}"
+  #     - name: Upload 3rd Party Artifacts
+  #       run: |
+  #         .github/workflows/publish/publishPackages "/home/runner/tmp/third-party-dependencies" "${{ env.GITHUB_REF }}"
