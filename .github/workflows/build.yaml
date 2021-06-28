@@ -203,8 +203,8 @@ jobs:
         uses: ./.github/actions/set-release-version
         with:
           moduleName: plenum
-          isDev: true
-          isRC: false
+          isDev: false
+          isRC: true
 
       - name: Echo Indy Plenum Version
         run: |
