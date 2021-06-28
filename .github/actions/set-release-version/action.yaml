@@ -29,10 +29,10 @@ runs:
     - name: Set Versions
       shell: bash
       run: |
-        fullVersion=$(python3 -c "from ${moduleName} import load_version; print(load_version().full)")
-        release=$(python3 -c "from ${moduleName} import load_version; print(load_version().release)")
-        pre=$(python3 -c "from ${moduleName} import load_version; pre = load_version().parts[-2]; print('' if pre is None else pre)")
-        revision=$(python3 -c "from ${moduleName} import load_version; rev = load_version().parts[-1]; print('' if rev is None else rev)")
+        fullVersion=$(python3 -c "from ${{ inputs.moduleName }} import load_version; print(load_version().full)")
+        release=$(python3 -c "from ${{ inputs.moduleName }} import load_version; print(load_version().release)")
+        pre=$(python3 -c "from ${{ inputs.moduleName }} import load_version; pre = load_version().parts[-2]; print('' if pre is None else pre)")
+        revision=$(python3 -c "from ${{ inputs.moduleName }} import load_version; rev = load_version().parts[-1]; print('' if rev is None else rev)")
 
         targetReleaseVer=${release}
         upstreamVer=${targetReleaseVer}
