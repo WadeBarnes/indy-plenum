@@ -15,13 +15,13 @@ inputs:
     required: true
     default: false
 
-outputs:
-  targetReleaseVer:
-    description: "The target release version."
-  upstreamVer:
-    description: "The version number to use with Python packages."
-  pkgVer:
-    description: "The version number to use with Debian packages."
+# outputs:
+#   targetReleaseVer:
+#     description: "The target release version."
+#   upstreamVer:
+#     description: "The version number to use with Python packages."
+#   pkgVer:
+#     description: "The version number to use with Debian packages."
 
 runs:
   using: "composite"
