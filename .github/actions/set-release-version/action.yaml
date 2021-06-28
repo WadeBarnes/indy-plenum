@@ -50,9 +50,9 @@ runs:
         fi
 
         # Set Outputs ...
-        echo "::set-output name=targetReleaseVer::${targetReleaseVer}"
-        echo "::set-output name=upstreamVer::${upstreamVer}"
-        echo "::set-output name=pkgVer::${pkgVer}"
+        echo "::set-output name=targetReleaseVer::$(echo ${targetReleaseVer})"
+        echo "::set-output name=upstreamVer::$(echo ${upstreamVer})"
+        echo "::set-output name=pkgVer::$(echo ${pkgVer})"
 
         echo "Target Release version is : ${targetReleaseVer}"
         echo "PyPI Release version is : ${upstreamVer}"
