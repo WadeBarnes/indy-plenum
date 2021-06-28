@@ -233,7 +233,7 @@ jobs:
           echo "pkgVer: ${pkgVer}"
           echo "================================================================"
 
-          if [! -z ${isDev} ]; then
+          if [ ! -z ${isDev} ]; then
             rev=${{ github.run_number }}
             upstreamVer+=".${pre}${rev}"
             pkgVer+="~${pre}${rev}"
