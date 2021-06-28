@@ -203,8 +203,8 @@ jobs:
         uses: ./.github/actions/set-release-version
         with:
           moduleName: plenum
-          isDev: ${{ ${{ needs.workflow-setup.outputs.GITHUB_REF }} == "dev" || ${{ needs.workflow-setup.outputs.GITHUB_REF }} == "master" }}
-          isRC: ${{ ${{ needs.workflow-setup.outputs.GITHUB_REF }} == "rc") }}
+          isDev: ${{ ${{ workflow-setup.outputs.GITHUB_REF }} == "dev" || ${{ workflow-setup.outputs.GITHUB_REF }} == "master" }}
+          isRC: ${{ ${{ workflow-setup.outputs.GITHUB_REF }} == "rc" }}
 
       - name: Echo Indy Plenum Version
         run: |
