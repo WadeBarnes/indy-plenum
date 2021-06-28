@@ -205,12 +205,36 @@ jobs:
           release=$(python3 -c "from ${moduleName} import load_version; print(load_version().release)")
           pre=$(python3 -c "from ${moduleName} import load_version; pre = load_version().parts[-2]; print('' if pre is None else pre)")
           revision=$(python3 -c "from ${moduleName} import load_version; rev = load_version().parts[-1]; print('' if rev is None else rev)")
-
+          echo "================================================================"
+          echo "Before:"
+          echo "----------------------------------------------------------------"
           echo "moduleName: ${moduleName}"
           echo "fullVersion: ${fullVersion}"
           echo "release: ${release}"
           echo "pre: ${pre}"
           echo "revision: ${revision}"
+          echo "================================================================"
+
+          echo "github.run_id: ${{ github.run_id }}"
+          echo "github.run_number: ${{ github.run_number }}"
+          echo "github.sha: ${{ github.sha }}"
+
+          pkgVer="${release}~${pre}${{ github.run_number }}"
+          ./bump_version.sh ${pkgVer}
+
+          fullVersion=$(python3 -c "from ${moduleName} import load_version; print(load_version().full)")
+          release=$(python3 -c "from ${moduleName} import load_version; print(load_version().release)")
+          pre=$(python3 -c "from ${moduleName} import load_version; pre = load_version().parts[-2]; print('' if pre is None else pre)")
+          revision=$(python3 -c "from ${moduleName} import load_version; rev = load_version().parts[-1]; print('' if rev is None else rev)")
+          echo "================================================================"
+          echo "After:"
+          echo "----------------------------------------------------------------"
+          echo "moduleName: ${moduleName}"
+          echo "fullVersion: ${fullVersion}"
+          echo "release: ${release}"
+          echo "pre: ${pre}"
+          echo "revision: ${revision}"
+          echo "================================================================"
 
       # - name: Build Indy Plenum deployment package
       #   run: |
