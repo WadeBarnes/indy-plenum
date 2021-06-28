@@ -2,8 +2,9 @@
 SCRIPT_HOME="$( cd "$( dirname "$0" )" && pwd )"
 
 sourceDirectory=${1}
-release=${2}
-uploadSpec=${UPLOAD_SPEC:-${3:-"${SCRIPT_HOME}/upload-spec.json"}}
+distribution=${2}
+component=${3}
+uploadSpec=${UPLOAD_SPEC:-${4:-"${SCRIPT_HOME}/upload-spec.json"}}
 
 export JFROG_CLI_LOG_LEVEL=DEBUG
 export CI=true
@@ -19,13 +20,13 @@ for packageName in ${fileList}; do
   echo "packageShortName: ${packageShortName}"
   echo "packageArchitecture: ${packageArchitecture}"
   echo "packageStartingLetter: ${packageStartingLetter}"
-  echo "release: ${release}"
+  echo "component: ${component}"
   echo "uploadSpec: ${uploadSpec}"
   echo "---------------------------------------------------------------------------------------------------------------------"
   jfrog rt u \
-    --deb xenial/${release}/${packageArchitecture} \
+    --deb ${distribution}/${component}/${packageArchitecture} \
     --spec ${uploadSpec}\
-    --spec-vars "SOURCE_DIR=${sourceDirectory};PACKAGE_NAME=${packageName};RELEASE=${release};PACKAGE_STARTING_LETTER=${packageStartingLetter};PACKAGE_SHORT_NAME=${packageShortName}" \
+    --spec-vars "SOURCE_DIR=${sourceDirectory};PACKAGE_NAME=${packageName};COMPONENT=${component};PACKAGE_STARTING_LETTER=${packageStartingLetter};PACKAGE_SHORT_NAME=${packageShortName}" \
     --detailed-summary
   echo "====================================================================================================================="
   echo

@@ -1,0 +1,31 @@
+name: "Publish Debian Packages"
+description: ""
+
+inputs:
+  sourceDirectory:
+    description: "The directory containing the packages to be published."
+    required: true
+  distribution:
+    description: "The distribution supported by the package. i.e xenial, focal, etc."
+    required: true
+  component:
+    description: "The component type.  i.e. stable, rc, dev"
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Setup JFrog CLI
+      uses: jfrog/setup-jfrog-cli@v1
+      env:
+        JF_ARTIFACTORY_1: ${{ secrets.INDY_ARTIFACTORY_REPO_CONFIG }}
+
+    - name: Ping JFrog server
+      run: |
+        jfrog rt ping
+
+    - name: Set Versions
+      id: versions
+      shell: bash
+      run: |
+        ${{ github.action_path }}/publishPackages "${{ inputs.sourceDirectory }}" "${{ inputs.distribution }}" "${{ inputs.component }}"
