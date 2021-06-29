@@ -125,7 +125,7 @@ jobs:
           touch ${GITHUB_WORKSPACE}/cache/${{ env.CACHE_KEY_LINT }}
 
   indy_plenum_tests:
-    name: Indy Plenum Test Slices
+    name: Sliced Module Tests
     # Reference to workflow-setup job is required to access the GITHUB_REPOSITORY_NAME output.
     needs: [workflow-setup, build-image]
     runs-on: ubuntu-20.04
@@ -173,7 +173,7 @@ jobs:
           retention-days: 5
 
   indy_plenum_module_tests:
-    name: Indy Plenum Module Tests
+    name: Module Tests
     # Reference to workflow-setup job is required to access the GITHUB_REPOSITORY_NAME output.
     needs: [workflow-setup, build-image]
     runs-on: ubuntu-20.04

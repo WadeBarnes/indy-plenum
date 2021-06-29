@@ -122,11 +122,11 @@ setup(
                       ],
 
     setup_requires=['pytest-runner'],
-    # extras_require={
-    #     'tests': tests_require,
-    #     'stats': ['python-firebase'],
-    #     'benchmark': ['pympler']
-    # },
+    extras_require={
+        'tests': tests_require,
+        'stats': ['python-firebase'],
+        'benchmark': ['pympler']
+    },
     tests_require=tests_require,
     scripts=['scripts/init_plenum_keys',
              'scripts/start_plenum_node',
