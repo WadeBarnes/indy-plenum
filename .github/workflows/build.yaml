@@ -272,7 +272,7 @@ jobs:
   publish_artifacts:
     name: Publish Artifacts
     runs-on: ubuntu-20.04
-    needs: ['workflow-setup', 'build_plenum_release', 'build_plenum_3rd_party_dependencies']
+    needs: [workflow-setup, build_release, build_3rd_party_dependencies]
     env:
       GITHUB_REF: ${{ needs.workflow-setup.outputs.GITHUB_REF }}
     if: ${{ needs.workflow-setup.outputs.publish }} == 'true'
