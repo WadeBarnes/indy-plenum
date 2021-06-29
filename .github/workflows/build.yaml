@@ -277,7 +277,7 @@ jobs:
       - name: Install dependencies
         run: |
           whoami
-          pip install .[tests]
+          pip --cache-dir /root/.cache/pip install .[tests]
 
       - name: Run Indy Plenum ${{ matrix.module }} tests
         run: python3 -m pytest -l -vv --junitxml=test-result-plenum-${{ matrix.module }}.xml ${{ matrix.module }}
