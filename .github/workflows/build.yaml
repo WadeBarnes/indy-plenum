@@ -93,7 +93,8 @@ jobs:
         shell: bash
         run: |
           DOCKER_IMAGE=ghcr.io/${{ env.GITHUB_REPOSITORY_NAME }}/plenum-build
-          TAGS="${DOCKER_IMAGE}:latest"
+          # ToDo - Update hard coded 'ubuntu-16-04' tag when integrating these flows with the ubuntu-20.04-upgrade branch.
+          TAGS="${DOCKER_IMAGE}:latest,${DOCKER_IMAGE}:ubuntu-16-04"
           echo ::set-output name=tags::${TAGS}
           echo ::set-output name=created::$(date -u +'%Y-%m-%dT%H:%M:%SZ')
 
@@ -154,7 +155,8 @@ jobs:
         shell: bash
         run: |
           DOCKER_IMAGE=ghcr.io/${{ env.GITHUB_REPOSITORY_NAME }}/plenum-lint
-          TAGS="${DOCKER_IMAGE}:latest"
+          # ToDo - Update hard coded 'ubuntu-18-04' tag when integrating these flows with the ubuntu-20.04-upgrade branch.
+          TAGS="${DOCKER_IMAGE}:latest,${DOCKER_IMAGE}:ubuntu-18-04"
           echo ::set-output name=tags::${TAGS}
           echo ::set-output name=created::$(date -u +'%Y-%m-%dT%H:%M:%SZ')
 
