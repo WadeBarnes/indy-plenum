@@ -25,7 +25,7 @@ jobs:
         id: repository-name
         uses: ASzc/change-string-case-action@v1
         with:
-          string: ${GITHUB_REPOSITORY}
+          string: ${{ github.repository }}
 
       - name: Set outputs
         id: cache
