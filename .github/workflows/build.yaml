@@ -276,6 +276,7 @@ jobs:
 
       - name: Install dependencies
         run: |
+          whoami
           pip install .[tests]
 
       - name: Run Indy Plenum ${{ matrix.module }} tests
