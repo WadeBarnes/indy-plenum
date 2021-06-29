@@ -3,6 +3,7 @@ on: [ push, pull_request, workflow_dispatch ]
 
 jobs:
   workflow-setup:
+    name: Initialize Workflow
     runs-on: ubuntu-latest
     outputs:
       CACHE_KEY_BUILD: ${{ steps.cache.outputs.CACHE_KEY_BUILD }}
@@ -15,6 +16,7 @@ jobs:
       GITHUB_REF: ${{ steps.cache.outputs.GITHUB_REF }}
       isDev: ${{ steps.build-flags.outputs.isDev }}
       isRC: ${{ steps.build-flags.outputs.isRC }}
+      publish: ${{ steps.build-flags.outputs.publish }}
     steps:
       - name: Git checkout
         uses: actions/checkout@v2
@@ -27,11 +29,11 @@ jobs:
           # Convert the GitHub repository name to lowercase
           echo "::set-output name=GITHUB_REPOSITORY_NAME::$(echo ${GITHUB_REPOSITORY,,})"
 
-          if [[ "${{github.base_ref}}" == "master" || "${{github.ref}}" == "refs/heads/master" ]]; then
+          if [[ "${{github.base_ref}}" == 'master' || "${{github.ref}}" == 'refs/heads/master' ]]; then
             echo "::set-output name=GITHUB_REF::master"
-          elif [[ "${{github.base_ref}}" == "release*" || "${{github.ref}}" == "refs/heads/release*" ]]; then
+          elif [[ "${{github.base_ref}}" == 'release*' || "${{github.ref}}" == 'refs/heads/release*' ]]; then
             echo "::set-output name=GITHUB_REF::rc"
-          elif [[ "${{github.base_ref}}" == "stable" || "${{github.ref}}" == "refs/heads/stable" ]]; then
+          elif [[ "${{github.base_ref}}" == 'stable' || "${{github.ref}}" == 'refs/heads/stable' ]]; then
             echo "::set-output name=GITHUB_REF::stable"
           else
             echo "::set-output name=GITHUB_REF::dev"
@@ -41,176 +43,185 @@ jobs:
         id: build-flags
         run: |
 
-          if [[ "${{steps.cache.outputs.GITHUB_REF}}" == "dev" || "${{steps.cache.outputs.GITHUB_REF}}" == "master" ]]; then
+          if [[ "${{steps.cache.outputs.GITHUB_REF}}" == 'dev' || "${{steps.cache.outputs.GITHUB_REF}}" == 'master' ]]; then
             echo "::set-output name=isDev::true"
           else
             echo "::set-output name=isDev::false"
           fi
 
-          if [[ "${{steps.cache.outputs.GITHUB_REF}}" == "rc" ]]; then
+          if [[ "${{steps.cache.outputs.GITHUB_REF}}" == 'rc' ]]; then
             echo "::set-output name=isRC::true"
           else
             echo "::set-output name=isRC::false"
           fi
 
-  # build-image:
-  #   # Reference to workflow-setup job is required to access its various outputs.
-  #   needs: workflow-setup
-  #   runs-on: ubuntu-latest
-  #   env:
-  #     DOCKER_BUILDKIT: 1
-  #     CACHE_KEY_BUILD: ${{ needs.workflow-setup.outputs.CACHE_KEY_BUILD }}
-  #     GITHUB_REPOSITORY_NAME: ${{ needs.workflow-setup.outputs.GITHUB_REPOSITORY_NAME }}
-  #   steps:
-  #     - name: Git checkout
-  #       uses: actions/checkout@v2
+          # ToDo:
+          #   - Remove the following line and uncomment the one below it when testing is complete.
+          if [[ github.event_name == 'push' && ( github.ref  == 'refs/heads/publishing-artifacts' || ${{steps.cache.outputs.GITHUB_REF}} == 'master' || ${{steps.cache.outputs.GITHUB_REF}} == 'rc' || ${{steps.cache.outputs.GITHUB_REF}} == 'stable' ) ]]; then
+          # if [[ github.event_name == 'push' && ( ${{steps.cache.outputs.GITHUB_REF}} == 'master' || ${{steps.cache.outputs.GITHUB_REF}} == 'rc' || ${{steps.cache.outputs.GITHUB_REF}} == 'stable' ) ]]; then
+            echo "::set-output name=publish::true"
+          else
+            echo "::set-output name=publish::false"
+          fi
 
-  #     - name: Try load from cache.
-  #       id: cache-image
-  #       uses: actions/cache@v2
-  #       with:
-  #         path: ${GITHUB_WORKSPACE}/cache
-  #         key: ${{ env.CACHE_KEY_BUILD}}
+  build-image:
+    name: Create Builder Image
+    # Reference to workflow-setup job is required to access its various outputs.
+    needs: workflow-setup
+    runs-on: ubuntu-latest
+    env:
+      DOCKER_BUILDKIT: 1
+      CACHE_KEY_BUILD: ${{ needs.workflow-setup.outputs.CACHE_KEY_BUILD }}
+      GITHUB_REPOSITORY_NAME: ${{ needs.workflow-setup.outputs.GITHUB_REPOSITORY_NAME }}
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v2
 
-  #     - name: If NOT found in cache, build and push image.
-  #       if: steps.cache-image.outputs.cache-hit != 'true'
-  #       run: |
-  #         echo ${{ secrets.CR_PAT }} | docker login ghcr.io --username ${{ secrets.CR_USER }} --password-stdin
-  #         docker build -f .github/workflows/build/Dockerfile --no-cache -t ${{ env.GITHUB_REPOSITORY_NAME }}/plenum-build:${{ env.CACHE_KEY_BUILD }} .
-  #         docker tag ${{ env.GITHUB_REPOSITORY_NAME }}/plenum-build:${{ env.CACHE_KEY_BUILD }} ghcr.io/${{ env.GITHUB_REPOSITORY_NAME }}/plenum-build:latest
-  #         docker push ghcr.io/${{ env.GITHUB_REPOSITORY_NAME }}/plenum-build:latest
-  #         mkdir -p ${GITHUB_WORKSPACE}/cache
-  #         touch ${GITHUB_WORKSPACE}/cache/${{ env.CACHE_KEY_BUILD }}
+      - name: Try load from cache
+        id: cache-image
+        uses: actions/cache@v2
+        with:
+          path: ${GITHUB_WORKSPACE}/cache
+          key: ${{ env.CACHE_KEY_BUILD}}
 
-  # lint-image:
-  #   # Reference to workflow-setup job is required to access its various outputs.
-  #   needs: workflow-setup
-  #   runs-on: ubuntu-latest
-  #   env:
-  #     DOCKER_BUILDKIT: 1
-  #     CACHE_KEY_LINT: ${{ needs.workflow-setup.outputs.CACHE_KEY_LINT }}
-  #     GITHUB_REPOSITORY_NAME: ${{ needs.workflow-setup.outputs.GITHUB_REPOSITORY_NAME }}
-  #   steps:
-  #     - name: Git checkout
-  #       uses: actions/checkout@v2
+      - name: Build and push image
+        if: steps.cache-image.outputs.cache-hit != 'true'
+        run: |
+          echo ${{ secrets.CR_PAT }} | docker login ghcr.io --username ${{ secrets.CR_USER }} --password-stdin
+          docker build -f .github/workflows/build/Dockerfile --no-cache -t ${{ env.GITHUB_REPOSITORY_NAME }}/plenum-build:${{ env.CACHE_KEY_BUILD }} .
+          docker tag ${{ env.GITHUB_REPOSITORY_NAME }}/plenum-build:${{ env.CACHE_KEY_BUILD }} ghcr.io/${{ env.GITHUB_REPOSITORY_NAME }}/plenum-build:latest
+          docker push ghcr.io/${{ env.GITHUB_REPOSITORY_NAME }}/plenum-build:latest
+          mkdir -p ${GITHUB_WORKSPACE}/cache
+          touch ${GITHUB_WORKSPACE}/cache/${{ env.CACHE_KEY_BUILD }}
 
-  #     - name: Try load from cache.
-  #       id: cache-image
-  #       uses: actions/cache@v2
-  #       with:
-  #         path: ${GITHUB_WORKSPACE}/cache
-  #         key: ${{ env.CACHE_KEY_LINT}}
+  lint-image:
+    name: Create Linter Image
+    # Reference to workflow-setup job is required to access its various outputs.
+    needs: workflow-setup
+    runs-on: ubuntu-latest
+    env:
+      DOCKER_BUILDKIT: 1
+      CACHE_KEY_LINT: ${{ needs.workflow-setup.outputs.CACHE_KEY_LINT }}
+      GITHUB_REPOSITORY_NAME: ${{ needs.workflow-setup.outputs.GITHUB_REPOSITORY_NAME }}
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v2
 
-  #     - name: If NOT found in cache, build and push image.
-  #       if: steps.cache-image.outputs.cache-hit != 'true'
-  #       run: |
-  #         echo ${{ secrets.CR_PAT }} | docker login ghcr.io --username ${{ secrets.CR_USER }} --password-stdin
-  #         docker build -f .github/workflows/lint/Dockerfile --no-cache -t ${{ env.GITHUB_REPOSITORY_NAME }}/plenum-lint:${{ env.CACHE_KEY_LINT }} .
-  #         docker tag ${{ env.GITHUB_REPOSITORY_NAME }}/plenum-lint:${{ env.CACHE_KEY_LINT }} ghcr.io/${{ env.GITHUB_REPOSITORY_NAME }}/plenum-lint:latest
-  #         docker push ghcr.io/${{ env.GITHUB_REPOSITORY_NAME }}/plenum-lint:latest
-  #         mkdir -p ${GITHUB_WORKSPACE}/cache
-  #         touch ${GITHUB_WORKSPACE}/cache/${{ env.CACHE_KEY_LINT }}
+      - name: Try load from cache
+        id: cache-image
+        uses: actions/cache@v2
+        with:
+          path: ${GITHUB_WORKSPACE}/cache
+          key: ${{ env.CACHE_KEY_LINT}}
 
-  # indy_plenum_tests:
-  #   name: Indy Plenum Test Slices
-  #   # Reference to workflow-setup job is required to access the GITHUB_REPOSITORY_NAME output.
-  #   needs: [workflow-setup, build-image]
-  #   runs-on: ubuntu-20.04
-  #   # Fix for scacap/action-surefire-report out of memory error:
-  #   # - https://github.com/ScaCap/action-surefire-report/issues/17
-  #   env:
-  #     NODE_OPTIONS: '--max_old_space_size=4096'
-  #   container:
-  #     image: ghcr.io/${{ needs.workflow-setup.outputs.GITHUB_REPOSITORY_NAME }}/plenum-build
-  #   strategy:
-  #     matrix:
-  #       module: [plenum]
-  #       # To slice up the tests into smaller chunks add additional sequential
-  #       # numbers here.  The subsequent steps will adjust automatically.
-  #       # ${{ strategy.job-total }} is used to get the total number of slices.
-  #       slice: [1, 2, 3, 4, 5, 6, 7, 8]
-  #     fail-fast: false
-  #   steps:
-  #     - name: Check out code
-  #       uses: actions/checkout@v2
+      - name: Build and push image
+        if: steps.cache-image.outputs.cache-hit != 'true'
+        run: |
+          echo ${{ secrets.CR_PAT }} | docker login ghcr.io --username ${{ secrets.CR_USER }} --password-stdin
+          docker build -f .github/workflows/lint/Dockerfile --no-cache -t ${{ env.GITHUB_REPOSITORY_NAME }}/plenum-lint:${{ env.CACHE_KEY_LINT }} .
+          docker tag ${{ env.GITHUB_REPOSITORY_NAME }}/plenum-lint:${{ env.CACHE_KEY_LINT }} ghcr.io/${{ env.GITHUB_REPOSITORY_NAME }}/plenum-lint:latest
+          docker push ghcr.io/${{ env.GITHUB_REPOSITORY_NAME }}/plenum-lint:latest
+          mkdir -p ${GITHUB_WORKSPACE}/cache
+          touch ${GITHUB_WORKSPACE}/cache/${{ env.CACHE_KEY_LINT }}
 
-  #     - name: Install dependencies
-  #       run: pip install .[tests]
+  indy_plenum_tests:
+    name: Indy Plenum Test Slices
+    # Reference to workflow-setup job is required to access the GITHUB_REPOSITORY_NAME output.
+    needs: [workflow-setup, build-image]
+    runs-on: ubuntu-20.04
+    # Fix for scacap/action-surefire-report out of memory error:
+    # - https://github.com/ScaCap/action-surefire-report/issues/17
+    env:
+      NODE_OPTIONS: '--max_old_space_size=4096'
+    container:
+      image: ghcr.io/${{ needs.workflow-setup.outputs.GITHUB_REPOSITORY_NAME }}/plenum-build
+    strategy:
+      matrix:
+        module: [plenum]
+        # To slice up the tests into smaller chunks add additional sequential
+        # numbers here.  The subsequent steps will adjust automatically.
+        # ${{ strategy.job-total }} is used to get the total number of slices.
+        slice: [1, 2, 3, 4, 5, 6, 7, 8]
+      fail-fast: false
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
 
-  #     - name: Run Indy Plenum ${{ matrix.module }} test slice ${{ matrix.slice }}/${{ strategy.job-total }}
-  #       id: plenum-test
-  #       run: RUSTPYTHONASYNCIODEBUG=0 python3 runner.py --pytest "python3 -m pytest -l -vv" --dir "${{ matrix.module }}" --output "test-result-plenum-${{ matrix.slice }}.txt" --test-only-slice "${{ matrix.slice }}/${{ strategy.job-total }}"
+      - name: Install dependencies
+        run: pip install .[tests]
 
-  #     - name: Publish Test Report
-  #       if: success() || failure()
-  #       uses: scacap/action-surefire-report@v1.0.7
-  #       continue-on-error: true
-  #       with:
-  #         check_name: Indy Plenum ${{ matrix.module }} Test Report for slice ${{ matrix.slice }}/${{ strategy.job-total }}
-  #         github_token: ${{ secrets.GITHUB_TOKEN }}
-  #         report_paths: "*-test-results.xml"
+      - name: Run Indy Plenum ${{ matrix.module }} test slice ${{ matrix.slice }}/${{ strategy.job-total }}
+        id: plenum-test
+        run: RUSTPYTHONASYNCIODEBUG=0 python3 runner.py --pytest "python3 -m pytest -l -vv" --dir "${{ matrix.module }}" --output "test-result-plenum-${{ matrix.slice }}.txt" --test-only-slice "${{ matrix.slice }}/${{ strategy.job-total }}"
 
-  #     - name: 'Upload Detailed Test Failure Results'
-  #       # The test runner only emits the detailed test results if the tests fail.
-  #       if: (steps.plenum-test.outcome == 'failure') && failure()
-  #       uses: actions/upload-artifact@v2
-  #       with:
-  #         name: detailed-test-result-slice-${{ matrix.slice }}
-  #         path: test-result-plenum-${{ matrix.slice }}.txt
-  #         retention-days: 5
+      - name: Publish Test Report
+        if: success() || failure()
+        uses: scacap/action-surefire-report@v1.0.7
+        continue-on-error: true
+        with:
+          check_name: Indy Plenum ${{ matrix.module }} Test Report for slice ${{ matrix.slice }}/${{ strategy.job-total }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          report_paths: "*-test-results.xml"
 
-  # indy_plenum:
-  #   name: Indy Plenum Tests
-  #   # Reference to workflow-setup job is required to access the GITHUB_REPOSITORY_NAME output.
-  #   needs: [workflow-setup, build-image]
-  #   runs-on: ubuntu-20.04
-  #   container:
-  #     image: ghcr.io/${{ needs.workflow-setup.outputs.GITHUB_REPOSITORY_NAME }}/plenum-build
-  #   strategy:
-  #     matrix:
-  #       module: [common, crypto, ledger, state, storage, stp_core, stp_zmq]
-  #     fail-fast: false
-  #   steps:
-  #     - name: Check out code
-  #       uses: actions/checkout@v2
+      - name: Upload Detailed Test Failure Results
+        # The test runner only emits the detailed test results if the tests fail.
+        if: (steps.plenum-test.outcome == 'failure') && failure()
+        uses: actions/upload-artifact@v2
+        with:
+          name: detailed-test-result-slice-${{ matrix.slice }}
+          path: test-result-plenum-${{ matrix.slice }}.txt
+          retention-days: 5
 
-  #     - name: Install dependencies
-  #       run: pip install .[tests]
-
-  #     - name: Run Indy Plenum ${{ matrix.module }} tests
-  #       run: python3 -m pytest -l -vv --junitxml=test-result-plenum-${{ matrix.module }}.xml ${{ matrix.module }}
-
-  #     - name: Publish Test Report
-  #       uses: scacap/action-surefire-report@v1.0.7
-  #       continue-on-error: true
-  #       with:
-  #         check_name: Indy Plenum ${{ matrix.module }} Test Report
-  #         github_token: ${{ secrets.GITHUB_TOKEN }}
-  #         report_paths: test-result-plenum-${{ matrix.module }}.xml
-
-  # lint:
-  #   name: Lint
-  #   # Reference to workflow-setup job is required to access the GITHUB_REPOSITORY_NAME output.
-  #   needs: [workflow-setup, lint-image]
-  #   runs-on: ubuntu-20.04
-  #   container:
-  #     image: ghcr.io/${{ needs.workflow-setup.outputs.GITHUB_REPOSITORY_NAME }}/plenum-lint
-  #   steps:
-  #     - name: Check out code
-  #       uses: actions/checkout@v2
-
-  #     - name: flake8
-  #       run: python3 -m flake8
-
-  build_plenum_release:
-    name: Indy Plenum Release
-    # needs: [workflow-setup, indy_plenum, indy_plenum_tests, lint]
-    needs: [workflow-setup]
+  indy_plenum_module_tests:
+    name: Indy Plenum Module Tests
+    # Reference to workflow-setup job is required to access the GITHUB_REPOSITORY_NAME output.
+    needs: [workflow-setup, build-image]
     runs-on: ubuntu-20.04
     container:
       image: ghcr.io/${{ needs.workflow-setup.outputs.GITHUB_REPOSITORY_NAME }}/plenum-build
     strategy:
+      matrix:
+        module: [common, crypto, ledger, state, storage, stp_core, stp_zmq]
       fail-fast: false
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: pip install .[tests]
+
+      - name: Run Indy Plenum ${{ matrix.module }} tests
+        run: python3 -m pytest -l -vv --junitxml=test-result-plenum-${{ matrix.module }}.xml ${{ matrix.module }}
+
+      - name: Publish Test Report
+        uses: scacap/action-surefire-report@v1.0.7
+        continue-on-error: true
+        with:
+          check_name: Indy Plenum ${{ matrix.module }} Test Report
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          report_paths: test-result-plenum-${{ matrix.module }}.xml
+
+  lint:
+    name: Lint
+    # Reference to workflow-setup job is required to access the GITHUB_REPOSITORY_NAME output.
+    needs: [workflow-setup, lint-image]
+    runs-on: ubuntu-20.04
+    container:
+      image: ghcr.io/${{ needs.workflow-setup.outputs.GITHUB_REPOSITORY_NAME }}/plenum-lint
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: flake8
+        run: python3 -m flake8
+
+  build_release:
+    name: Build Release
+    needs: [workflow-setup, indy_plenum_tests, indy_plenum_module_tests, lint]
+    # needs: [workflow-setup]
+    runs-on: ubuntu-20.04
+    container:
+      image: ghcr.io/${{ needs.workflow-setup.outputs.GITHUB_REPOSITORY_NAME }}/plenum-build
     steps:
       - name: Check out code
         uses: actions/checkout@v1
@@ -223,7 +234,7 @@ jobs:
           isDev: ${{ needs.workflow-setup.outputs.isDev }}
           isRC: ${{ needs.workflow-setup.outputs.isRC }}
 
-      - name: Build Indy Plenum deployment package
+      - name: Build Deployment Package
         run: |
           mkdir -p /tmp/plenum-build
           ./build-scripts/ubuntu-1604/build-indy-plenum.sh "/__w/indy-plenum/indy-plenum" "${{ steps.version.outputs.upstreamVer }}" "/tmp/plenum-build" "${{ steps.version.outputs.pkgVer }}"
@@ -233,15 +244,13 @@ jobs:
           name: plenum-deb
           path: /tmp/plenum-build
 
-  build_plenum_3rd_party_dependencies:
-    name: Indy Plenum 3rd Party Dependencies
-    # needs: [workflow-setup, indy_plenum, indy_plenum_tests, lint]
-    needs: [workflow-setup]
+  build_3rd_party_dependencies:
+    name: Build 3rd Party Dependencies
+    needs: [workflow-setup, indy_plenum_tests, indy_plenum_module_tests, lint]
+    # needs: [workflow-setup]
     runs-on: ubuntu-20.04
     container:
       image: ghcr.io/${{ needs.workflow-setup.outputs.GITHUB_REPOSITORY_NAME }}/plenum-build
-    strategy:
-      fail-fast: false
     steps:
       - name: Check out code
         uses: actions/checkout@v1
@@ -260,14 +269,13 @@ jobs:
           ./build-scripts/ubuntu-1604/build-3rd-parties.sh ./cache/3rd-party-dependencies
           mv ./build-scripts/ubuntu-1604/cache/* /tmp/third-party-dependencies
 
-  publish_plenum_artifacts:
-    name: Publish artifacts
+  publish_artifacts:
+    name: Publish Artifacts
     runs-on: ubuntu-20.04
     needs: ['workflow-setup', 'build_plenum_release', 'build_plenum_3rd_party_dependencies']
-    # needs: ['workflow-setup', 'build_plenum_release']
     env:
       GITHUB_REF: ${{ needs.workflow-setup.outputs.GITHUB_REF }}
-    if: github.event_name == 'push' && ( github.ref  == 'refs/heads/publishing-artifacts' || github.ref  == 'refs/heads/master' || github.ref  == 'refs/heads/release*' || github.ref  == 'refs/heads/stable' )
+    if: ${{ needs.workflow-setup.outputs.publish }} == 'true'
     steps:
       - name: Check out code
         uses: actions/checkout@v1
@@ -277,9 +285,10 @@ jobs:
         env:
           JF_ARTIFACTORY_1: ${{ secrets.INDY_ARTIFACTORY_REPO_CONFIG }}
 
-      - name: Ping JFrog server
+      - name: Ping Artifactory
         run: |
-          # Ping the JFrog Artifactory server of Hyperledger
+          # Test the connection to Ping the Hyperledger Artifactory server
+          # to ensure everything has been setup correctly.
           jfrog rt ping
 
       - name: Download Plenum Artifacts from Pipeline Artifacts
@@ -295,7 +304,7 @@ jobs:
           distribution: xenial
           component: ${{ env.GITHUB_REF }}
 
-      - name: Download 3rd Party Artifacts from Cache
+      - name: Download 3rd Party Artifacts Dependencies from Cache
         id: third-party-dependencies
         uses: actions/cache@v2
         with:
@@ -304,7 +313,7 @@ jobs:
           restore-keys: |
             third-party-dependencies-
 
-      - name: Publish 3rd Party Artifacts
+      - name: Publish 3rd Party Dependencies
         uses: ./.github/actions/publish-deb
         with:
           sourceDirectory: /home/runner/tmp/third-party-dependencies
