@@ -12,7 +12,7 @@ TMP_DIR=$(mktemp -d)
 cp -r ${INPUT_PATH}/. ${TMP_DIR}
 
 # prepare the sources
-cd ${TMP_DIR}/build-scripts/ubuntu-2004
+cd ${TMP_DIR}/build-scripts/ubuntu-20-04
 ./prepare-package.sh ${TMP_DIR} ${VERSION}
 
 sed -i 's/{package_name}/'${PACKAGE_NAME}'/' "postinst"
