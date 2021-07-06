@@ -105,5 +105,8 @@ RUN echo "deb https://repo.sovrin.org/sdk/deb bionic master" >> /etc/apt/sources
     apt-get update -y && apt-get install -y \ 
     libindy=1.15.0~1625-bionic
 
+# install fpm
+RUN gem install --no-document rake fpm
+
 RUN apt-get -y autoremove
 RUN rm -rf /var/lib/apt/lists/*
