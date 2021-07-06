@@ -21,7 +21,7 @@ jobs:
     outputs:
       CACHE_KEY_BUILD: ${{ steps.cache.outputs.CACHE_KEY_BUILD }}
       CACHE_KEY_LINT: ${{ steps.cache.outputs.CACHE_KEY_LINT }}
-      DOCKER_FILE_POSTFIX: ${{ steps.cache.outputs.DOCKER_FILE_POSTFIX }}
+      UBUNTU_VERSION: ${{ steps.cache.outputs.UBUNTU_VERSION }}
       # Expose the lowercase version of the GitHub repository name
       # to all subsequent jobs that reference image repositories
       # as the push and pull operations require the URL of the repository
@@ -46,14 +46,14 @@ jobs:
         run: |
           # Set variables according to version of ubuntu
           if [[ "${{github.base_ref}}" == "master" || "${{github.ref}}" == "refs/heads/master" ]]; then
-            echo "::set-output name=CACHE_KEY_BUILD::${{ hashFiles('.github/workflows/build/Dockerfile.ubuntu-16-04') }}"
-            echo "::set-output name=CACHE_KEY_LINT::${{ hashFiles('.github/workflows/lint/Dockerfile.ubuntu-16-04') }}"
-            echo "::set-output name=DOCKER_FILE_POSTFIX::ubuntu-16-04"
+            echo "::set-output name=CACHE_KEY_BUILD::${{ hashFiles('.github/workflows/build/Dockerfile.ubuntu-1604') }}"
+            echo "::set-output name=CACHE_KEY_LINT::${{ hashFiles('.github/workflows/lint/Dockerfile.ubuntu-1604') }}"
+            echo "::set-output name=UBUNTU_VERSION::ubuntu-1604"
           fi
           if [[ "${{github.base_ref}}" == "ubuntu-20.04" || "${{github.ref}}" == "refs/heads/ubuntu-20.04" ||  "${{github.base_ref}}" == "ubuntu-20.04-upgrade" || "${{github.ref}}" == "refs/heads/ubuntu-20.04-upgrade" || "${{github.base_ref}}" == "publishing-artifacts-ubuntu-20.04" || "${{github.ref}}" == "refs/heads/publishing-artifacts-ubuntu-20.04" ]]; then
-            echo "::set-output name=CACHE_KEY_BUILD::${{ hashFiles('.github/workflows/build/Dockerfile.ubuntu-20-04') }}"
-            echo "::set-output name=CACHE_KEY_LINT::${{ hashFiles('.github/workflows/lint/Dockerfile.ubuntu-20-04') }}"
-            echo "::set-output name=DOCKER_FILE_POSTFIX::ubuntu-20-04"
+            echo "::set-output name=CACHE_KEY_BUILD::${{ hashFiles('.github/workflows/build/Dockerfile.ubuntu-2004') }}"
+            echo "::set-output name=CACHE_KEY_LINT::${{ hashFiles('.github/workflows/lint/Dockerfile.ubuntu-2004') }}"
+            echo "::set-output name=UBUNTU_VERSION::ubuntu-2004"
           fi
 
           if [[ "${{github.base_ref}}" == 'master' || "${{github.ref}}" == 'refs/heads/master' || "${{github.base_ref}}" == 'main' || "${{github.ref}}" == 'refs/heads/main' ]]; then
@@ -97,7 +97,7 @@ jobs:
     env:
       CACHE_KEY_BUILD: ${{ needs.workflow-setup.outputs.CACHE_KEY_BUILD }}
       GITHUB_REPOSITORY_NAME: ${{ needs.workflow-setup.outputs.GITHUB_REPOSITORY_NAME }}
-      DOCKER_FILE_POSTFIX: ${{ needs.workflow-setup.outputs.DOCKER_FILE_POSTFIX }}
+      UBUNTU_VERSION: ${{ needs.workflow-setup.outputs.UBUNTU_VERSION }}
     steps:
       - name: Git checkout
         uses: actions/checkout@v2
@@ -115,8 +115,7 @@ jobs:
         shell: bash
         run: |
           DOCKER_IMAGE=ghcr.io/${{ env.GITHUB_REPOSITORY_NAME }}/plenum-build
-          # ToDo - Update hard coded 'ubuntu-16-04' tag when integrating these flows with the ubuntu-20.04-upgrade branch.
-          TAGS="${DOCKER_IMAGE}:latest,${DOCKER_IMAGE}:${{ env.DOCKER_FILE_POSTFIX }}"
+          TAGS="${DOCKER_IMAGE}:latest,${DOCKER_IMAGE}:${{ env.UBUNTU_VERSION }}"
           echo ::set-output name=tags::${TAGS}
           echo ::set-output name=created::$(date -u +'%Y-%m-%dT%H:%M:%SZ')
 
@@ -137,7 +136,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: .
-          file: .github/workflows/build/Dockerfile.${{ env.DOCKER_FILE_POSTFIX }}
+          file: .github/workflows/build/Dockerfile.${{ env.UBUNTU_VERSION }}
           no-cache: true
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.prep.outputs.tags }}
@@ -150,9 +149,9 @@ jobs:
         if: steps.cache-image.outputs.cache-hit != 'true'
         run: |
           # echo ${{ secrets.CR_PAT }} | docker login ghcr.io --username ${{ secrets.CR_USER }} --password-stdin
-          # docker build -f .github/workflows/build/Dockerfile.${{ env.DOCKER_FILE_POSTFIX }} --no-cache -t ${{ env.GITHUB_REPOSITORY_NAME }}/plenum-build:${{ env.CACHE_KEY_BUILD }} .
-          # docker tag ${{ env.GITHUB_REPOSITORY_NAME }}/plenum-build:${{ env.CACHE_KEY_BUILD }} ghcr.io/${{ env.GITHUB_REPOSITORY_NAME }}/plenum-build:${{ env.DOCKER_FILE_POSTFIX }}
-          # docker push ghcr.io/${{ env.GITHUB_REPOSITORY_NAME }}/plenum-build:${{ env.DOCKER_FILE_POSTFIX }}
+          # docker build -f .github/workflows/build/Dockerfile.${{ env.UBUNTU_VERSION }} --no-cache -t ${{ env.GITHUB_REPOSITORY_NAME }}/plenum-build:${{ env.CACHE_KEY_BUILD }} .
+          # docker tag ${{ env.GITHUB_REPOSITORY_NAME }}/plenum-build:${{ env.CACHE_KEY_BUILD }} ghcr.io/${{ env.GITHUB_REPOSITORY_NAME }}/plenum-build:${{ env.UBUNTU_VERSION }}
+          # docker push ghcr.io/${{ env.GITHUB_REPOSITORY_NAME }}/plenum-build:${{ env.UBUNTU_VERSION }}
           mkdir -p ${GITHUB_WORKSPACE}/cache
           touch ${GITHUB_WORKSPACE}/cache/${{ env.CACHE_KEY_BUILD }}
 
@@ -164,7 +163,7 @@ jobs:
   #   env:
   #     CACHE_KEY_LINT: ${{ needs.workflow-setup.outputs.CACHE_KEY_LINT }}
   #     GITHUB_REPOSITORY_NAME: ${{ needs.workflow-setup.outputs.GITHUB_REPOSITORY_NAME }}
-  #     DOCKER_FILE_POSTFIX: ${{ needs.workflow-setup.outputs.DOCKER_FILE_POSTFIX }}
+  #     UBUNTU_VERSION: ${{ needs.workflow-setup.outputs.UBUNTU_VERSION }}
   #   steps:
   #     - name: Git checkout
   #       uses: actions/checkout@v2
@@ -204,7 +203,7 @@ jobs:
   #       uses: docker/build-push-action@v2
   #       with:
   #         context: .
-  #         file: .github/workflows/lint/Dockerfile.${{ env.DOCKER_FILE_POSTFIX }}
+  #         file: .github/workflows/lint/Dockerfile.${{ env.UBUNTU_VERSION }}
   #         no-cache: true
   #         push: ${{ github.event_name != 'pull_request' }}
   #         tags: ${{ steps.prep.outputs.tags }}
@@ -218,9 +217,9 @@ jobs:
   #       run: |
   #         # export GITHUB_REPOSITORY_NAME=$(echo ${GITHUB_REPOSITORY,,})
   #         # echo ${{ secrets.CR_PAT }} | docker login ghcr.io --username ${{ secrets.CR_USER }} --password-stdin
-  #         # docker build -f .github/workflows/lint/Dockerfile.${{ env.DOCKER_FILE_POSTFIX }} --no-cache -t ${{ env.GITHUB_REPOSITORY_NAME }}/plenum-lint:${{ env.CACHE_KEY_LINT }} .
-  #         # docker tag ${{ env.GITHUB_REPOSITORY_NAME }}/plenum-lint:${{ env.CACHE_KEY_LINT }} ghcr.io/${{ env.GITHUB_REPOSITORY_NAME }}/plenum-lint:${{ env.DOCKER_FILE_POSTFIX }}
-  #         # docker push ghcr.io/${{ env.GITHUB_REPOSITORY_NAME }}/plenum-lint:${{ env.DOCKER_FILE_POSTFIX }}
+  #         # docker build -f .github/workflows/lint/Dockerfile.${{ env.UBUNTU_VERSION }} --no-cache -t ${{ env.GITHUB_REPOSITORY_NAME }}/plenum-lint:${{ env.CACHE_KEY_LINT }} .
+  #         # docker tag ${{ env.GITHUB_REPOSITORY_NAME }}/plenum-lint:${{ env.CACHE_KEY_LINT }} ghcr.io/${{ env.GITHUB_REPOSITORY_NAME }}/plenum-lint:${{ env.UBUNTU_VERSION }}
+  #         # docker push ghcr.io/${{ env.GITHUB_REPOSITORY_NAME }}/plenum-lint:${{ env.UBUNTU_VERSION }}
   #         mkdir -p ${GITHUB_WORKSPACE}/cache
   #         touch ${GITHUB_WORKSPACE}/cache/${{ env.CACHE_KEY_LINT }}
 
@@ -233,9 +232,9 @@ jobs:
   #   # - https://github.com/ScaCap/action-surefire-report/issues/17
   #   env:
   #     NODE_OPTIONS: "--max_old_space_size=4096"
-  #     DOCKER_FILE_POSTFIX: ${{ needs.workflow-setup.outputs.DOCKER_FILE_POSTFIX }}
+  #     UBUNTU_VERSION: ${{ needs.workflow-setup.outputs.UBUNTU_VERSION }}
   #   container:
-  #     image: ghcr.io/${{ needs.workflow-setup.outputs.GITHUB_REPOSITORY_NAME }}/plenum-build:${{ needs.workflow-setup.outputs.DOCKER_FILE_POSTFIX }}
+  #     image: ghcr.io/${{ needs.workflow-setup.outputs.GITHUB_REPOSITORY_NAME }}/plenum-build:${{ needs.workflow-setup.outputs.UBUNTU_VERSION }}
   #   strategy:
   #     matrix:
   #       module: [plenum]
@@ -291,9 +290,9 @@ jobs:
   #   needs: [workflow-setup, build-image]
   #   runs-on: ubuntu-20.04
   #   env:
-  #     DOCKER_FILE_POSTFIX: ${{ needs.workflow-setup.outputs.DOCKER_FILE_POSTFIX }}
+  #     UBUNTU_VERSION: ${{ needs.workflow-setup.outputs.UBUNTU_VERSION }}
   #   container:
-  #     image: ghcr.io/${{ needs.workflow-setup.outputs.GITHUB_REPOSITORY_NAME }}/plenum-build:${{ needs.workflow-setup.outputs.DOCKER_FILE_POSTFIX }}
+  #     image: ghcr.io/${{ needs.workflow-setup.outputs.GITHUB_REPOSITORY_NAME }}/plenum-build:${{ needs.workflow-setup.outputs.UBUNTU_VERSION }}
   #   strategy:
   #     matrix:
   #       module: [common, crypto, ledger, state, storage, stp_core, stp_zmq]
@@ -334,9 +333,9 @@ jobs:
   #   needs: [workflow-setup, lint-image]
   #   runs-on: ubuntu-20.04
   #   env:
-  #     DOCKER_FILE_POSTFIX: ${{ needs.workflow-setup.outputs.DOCKER_FILE_POSTFIX }}
+  #     UBUNTU_VERSION: ${{ needs.workflow-setup.outputs.UBUNTU_VERSION }}
   #   container:
-  #     image: ghcr.io/${{ needs.workflow-setup.outputs.GITHUB_REPOSITORY_NAME }}/plenum-lint:${{ needs.workflow-setup.outputs.DOCKER_FILE_POSTFIX }}
+  #     image: ghcr.io/${{ needs.workflow-setup.outputs.GITHUB_REPOSITORY_NAME }}/plenum-lint:${{ needs.workflow-setup.outputs.UBUNTU_VERSION }}
   #   steps:
   #     - name: Check out code
   #       uses: actions/checkout@v2
@@ -350,9 +349,9 @@ jobs:
     needs: [workflow-setup, build-image]
     runs-on: ubuntu-20.04
     env:
-      DOCKER_FILE_POSTFIX: ${{ needs.workflow-setup.outputs.DOCKER_FILE_POSTFIX }}
+      UBUNTU_VERSION: ${{ needs.workflow-setup.outputs.UBUNTU_VERSION }}
     container:
-      image: ghcr.io/${{ needs.workflow-setup.outputs.GITHUB_REPOSITORY_NAME }}/plenum-build:${{ needs.workflow-setup.outputs.DOCKER_FILE_POSTFIX }}
+      image: ghcr.io/${{ needs.workflow-setup.outputs.GITHUB_REPOSITORY_NAME }}/plenum-build:${{ needs.workflow-setup.outputs.UBUNTU_VERSION }}
     steps:
       - name: Check out code
         uses: actions/checkout@v1
@@ -368,7 +367,7 @@ jobs:
       - name: Build Deployment Package
         run: |
           mkdir -p /tmp/plenum-build
-          ./build-scripts/${{ env.DOCKER_FILE_POSTFIX }}/build-indy-plenum.sh "/__w/indy-plenum/indy-plenum" "${{ steps.version.outputs.upstreamVer }}" "/tmp/plenum-build" "${{ steps.version.outputs.pkgVer }}"
+          ./build-scripts/${{ env.UBUNTU_VERSION }}/build-indy-plenum.sh "/__w/indy-plenum/indy-plenum" "${{ steps.version.outputs.upstreamVer }}" "/tmp/plenum-build" "${{ steps.version.outputs.pkgVer }}"
 
       - uses: actions/upload-artifact@v2
         with:
@@ -382,9 +381,9 @@ jobs:
     needs: [workflow-setup, build-image]
     runs-on: ubuntu-20.04
     env:
-      DOCKER_FILE_POSTFIX: ${{ needs.workflow-setup.outputs.DOCKER_FILE_POSTFIX }}
+      UBUNTU_VERSION: ${{ needs.workflow-setup.outputs.UBUNTU_VERSION }}
     container:
-      image: ghcr.io/${{ needs.workflow-setup.outputs.GITHUB_REPOSITORY_NAME }}/plenum-build:${{ needs.workflow-setup.outputs.DOCKER_FILE_POSTFIX }}
+      image: ghcr.io/${{ needs.workflow-setup.outputs.GITHUB_REPOSITORY_NAME }}/plenum-build:${{ needs.workflow-setup.outputs.UBUNTU_VERSION }}
     steps:
       - name: Check out code
         uses: actions/checkout@v1
@@ -394,14 +393,14 @@ jobs:
         uses: actions/cache@v2
         with:
           path: /tmp/third-party-dependencies
-          key: third-party-dependencies-${{ hashFiles('./build-scripts/${{ env.DOCKER_FILE_POSTFIX }}/build-3rd-parties.sh') }}
+          key: third-party-dependencies-${{ hashFiles('./build-scripts/${{ env.UBUNTU_VERSION }}/build-3rd-parties.sh') }}
 
       - name: Build 3rd party deployment packages
         if: steps.third-party-dependencies.outputs.cache-hit != 'true'
         run: |
-          mkdir -p ./build-scripts/${{ env.DOCKER_FILE_POSTFIX }}/cache/3rd-party-dependencies/
-          ./build-scripts/${{ env.DOCKER_FILE_POSTFIX }}/build-3rd-parties.sh ./cache/3rd-party-dependencies
-          mv ./build-scripts/${{ env.DOCKER_FILE_POSTFIX }}/cache/* /tmp/third-party-dependencies
+          mkdir -p ./build-scripts/${{ env.UBUNTU_VERSION }}/cache/3rd-party-dependencies/
+          ./build-scripts/${{ env.UBUNTU_VERSION }}/build-3rd-parties.sh ./cache/3rd-party-dependencies
+          mv ./build-scripts/${{ env.UBUNTU_VERSION }}/cache/* /tmp/third-party-dependencies
 
   publish_artifacts:
     name: Publish Artifacts
@@ -410,7 +409,7 @@ jobs:
     if: needs.workflow-setup.outputs.publish == 'true'
     env:
       GITHUB_REF: ${{ needs.workflow-setup.outputs.GITHUB_REF }}
-      DOCKER_FILE_POSTFIX: ${{ needs.workflow-setup.outputs.DOCKER_FILE_POSTFIX }}
+      UBUNTU_VERSION: ${{ needs.workflow-setup.outputs.UBUNTU_VERSION }}
     steps:
       - name: Check out code
         uses: actions/checkout@v1
@@ -444,7 +443,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: /tmp/third-party-dependencies
-          key: third-party-dependencies-${{ hashFiles('./build-scripts/${{ env.DOCKER_FILE_POSTFIX }}/build-3rd-parties.sh') }}
+          key: third-party-dependencies-${{ hashFiles('./build-scripts/${{ env.UBUNTU_VERSION }}/build-3rd-parties.sh') }}
           restore-keys: |
             third-party-dependencies-
 

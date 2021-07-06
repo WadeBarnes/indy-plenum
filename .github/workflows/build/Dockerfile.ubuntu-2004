@@ -10,16 +10,10 @@ RUN apt-get update -y && apt-get install -y \
     apt-transport-https \
     ca-certificates \
     apt-utils \
-    nano \
     # Python
     python3-pip \
     python3-nacl \
-    # Just for testing (libsodium23, iptables, at)
-    # libsodium23 \
-    # iptables \
-    # at \
     # rocksdb python wrapper
-    rocksdb-tools \
     librocksdb5.17 \
     librocksdb-dev \
     libsnappy-dev \
