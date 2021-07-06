@@ -102,7 +102,7 @@ function build_from_pypi {
 # TODO duplicates list from Jenkinsfile.cd
 
 # Build rocksdb at first
-build_rocksdb_deb 5.17.2
+# build_rocksdb_deb 5.17.2
 
 build_from_pypi ioflo 2.0.2
 build_from_pypi orderedset 2.0.3
