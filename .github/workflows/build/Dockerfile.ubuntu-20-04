@@ -25,6 +25,8 @@ RUN apt-get update -y && apt-get install -y \
     libsnappy-dev \
     liblz4-dev \
     libbz2-dev \
+    # zstd is needed for caching in github actions pipeline
+    zstd \
     && rm -rf /var/lib/apt/lists/*
 
 # pypi based packages
