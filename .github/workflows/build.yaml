@@ -50,7 +50,7 @@ jobs:
             echo "::set-output name=CACHE_KEY_LINT::${{ hashFiles('.github/workflows/lint/Dockerfile.ubuntu-16-04') }}"
             echo "::set-output name=DOCKER_FILE_POSTFIX::ubuntu-16-04"
           fi
-          if [[ "${{github.base_ref}}" == "ubuntu-20.04" || "${{github.ref}}" == "refs/heads/ubuntu-20.04" ||  "${{github.base_ref}}" == "ubuntu-20.04-upgrade" || "${{github.ref}}" == "refs/heads/ubuntu-20.04-upgrade" ]]; then
+          if [[ "${{github.base_ref}}" == "ubuntu-20.04" || "${{github.ref}}" == "refs/heads/ubuntu-20.04" ||  "${{github.base_ref}}" == "ubuntu-20.04-upgrade" || "${{github.ref}}" == "refs/heads/ubuntu-20.04-upgrade" || "${{github.base_ref}}" == "publishing-artifacts-ubuntu-20.04" || "${{github.ref}}" == "refs/heads/publishing-artifacts-ubuntu-20.04" ]]; then
             echo "::set-output name=CACHE_KEY_BUILD::${{ hashFiles('.github/workflows/build/Dockerfile.ubuntu-20-04') }}"
             echo "::set-output name=CACHE_KEY_LINT::${{ hashFiles('.github/workflows/lint/Dockerfile.ubuntu-20-04') }}"
             echo "::set-output name=DOCKER_FILE_POSTFIX::ubuntu-20-04"
