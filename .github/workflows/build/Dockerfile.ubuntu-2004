@@ -74,7 +74,7 @@ RUN pip3 install -U \
     # semver==2.13.0 \
     ### setuptools v52.0.0 fails, because easy_install was removed https://setuptools.readthedocs.io/en/latest/history.html#v52-0-0
     ### ToDo:Test with setuptools==51.3.3
-    setuptools==51.3.3 
+    setuptools==50.3.2 
     # sha3==0.2.1 \
     # six==1.15.0 \
     # sortedcontainers==1.5.7 \
