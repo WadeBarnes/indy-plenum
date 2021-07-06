@@ -6,12 +6,14 @@ on:
       - gha-ubuntu-20.04
       - ubuntu-20.04
       - ubuntu-20.04-upgrade
+      - publishing-artifacts-ubuntu-20.04
   pull_request:
     branches:
       - master
       - gha-ubuntu-20.04
       - ubuntu-20.04
       - ubuntu-20.04-upgrade
+      - publishing-artifacts-ubuntu-20.04
 jobs:
   workflow-setup:
     name: Initialize Workflow
