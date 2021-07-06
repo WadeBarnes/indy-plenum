@@ -366,7 +366,7 @@ jobs:
       - name: Build Deployment Package
         run: |
           mkdir -p /tmp/plenum-build
-          ./build-scripts/${{ env.DOCKER_FILE_POSTFIX }/build-indy-plenum.sh "/__w/indy-plenum/indy-plenum" "${{ steps.version.outputs.upstreamVer }}" "/tmp/plenum-build" "${{ steps.version.outputs.pkgVer }}"
+          ./build-scripts/${{ env.DOCKER_FILE_POSTFIX }}/build-indy-plenum.sh "/__w/indy-plenum/indy-plenum" "${{ steps.version.outputs.upstreamVer }}" "/tmp/plenum-build" "${{ steps.version.outputs.pkgVer }}"
 
       - uses: actions/upload-artifact@v2
         with:
