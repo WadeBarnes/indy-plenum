@@ -181,8 +181,7 @@ jobs:
         shell: bash
         run: |
           DOCKER_IMAGE=ghcr.io/${{ env.GITHUB_REPOSITORY_NAME }}/plenum-lint
-          # ToDo - Update hard coded 'ubuntu-18-04' tag when integrating these flows with the ubuntu-20.04-upgrade branch.
-          TAGS="${DOCKER_IMAGE}:latest,${DOCKER_IMAGE}:ubuntu-18-04"
+          TAGS="${DOCKER_IMAGE}:latest,${DOCKER_IMAGE}:${{ env.UBUNTU_VERSION }}"
           echo ::set-output name=tags::${TAGS}
           echo ::set-output name=created::$(date -u +'%Y-%m-%dT%H:%M:%SZ')
 
