@@ -9,6 +9,8 @@ from ledger.tree_hasher import TreeHasher
 from ledger.util import ConsistencyVerificationFailed
 from ledger.util import count_bits_set, lowest_bit_set
 
+import logging
+logger = logging.getLogger()
 
 class CompactMerkleTree(merkle_tree.MerkleTree):
     """Compact representation of a Merkle Tree that permits only extension.
@@ -24,8 +26,11 @@ class CompactMerkleTree(merkle_tree.MerkleTree):
 
         # These two queues should be written to two simple position-accessible
         # arrays (files, database tables, etc.)
+        logger.warning(f"Init CompactMerkleTree")
+        logger.warning(f"hashStore: {hashStore}")
         self.__hashStore = hashStore or MemoryHashStore()  # type: HashStore
         self.__hasher = hasher
+        logger.warning(f"hashStore: {hashStore}")
         self._update(tree_size, hashes)
 
     @property

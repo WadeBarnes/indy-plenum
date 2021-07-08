@@ -1,9 +1,14 @@
 from ledger.hash_stores.hash_store import HashStore
 
+import logging
+logger = logging.getLogger()
 
 class MemoryHashStore(HashStore):
     def __init__(self):
+        logging.warning(f"Init MemoryHashStore")
+        logging.warning(f"reset")
         self.reset()
+        logging.warning(f"open")
         self.open()
 
     @property

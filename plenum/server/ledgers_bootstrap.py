@@ -98,21 +98,28 @@ class LedgersBootstrap:
         raise NotImplemented
 
     def _init_storages(self, domain_storage):
+        logger.warning(f"_init_storages, domain_storage; {domain_storage}")
+
+
+        logger.warning(f"self.db_manager.register_new_database")
         self.db_manager.register_new_database(CONFIG_LEDGER_ID,
                                               self._create_ledger('config'),
                                               self._create_state('config'),
                                               taa_acceptance_required=False)
 
+        logger.warning(f"self.db_manager.register_new_database: pool")
         self.db_manager.register_new_database(POOL_LEDGER_ID,
                                               self._create_ledger('pool', self.pool_genesis),
                                               self._create_state('pool'),
                                               taa_acceptance_required=False)
 
+        logger.warning(f"db_manager.register_new_database: domain")
         self.db_manager.register_new_database(DOMAIN_LEDGER_ID,
                                               domain_storage or self._create_domain_ledger(),
                                               self._create_state('domain'),
                                               taa_acceptance_required=True)
 
+        logger.warning(f"db_manager.register_new_database: audit")
         self.db_manager.register_new_database(AUDIT_LEDGER_ID,
                                               self._create_ledger('audit'),
                                               taa_acceptance_required=False)
@@ -212,14 +219,21 @@ class LedgersBootstrap:
             self._init_state_from_ledger(l_id)
 
     def _create_ledger(self, name: str, genesis: Optional[GenesisTxnInitiator] = None) -> Ledger:
+        logger.warning(f"--> _create_ledger")
+        
         hs_type = HS_MEMORY if self.data_location is None else None
+
+        logger.warning(f"--> _create_ledger->initHashStore")
         hash_store = initHashStore(self.data_location, name, self.config, hs_type=hs_type)
+        logger.warning(f"--> _create_ledger->getattr")
         txn_file_name = getattr(self.config, "{}TransactionsFile".format(name))
 
         txn_log_storage = None
         if self.data_location is None:
+            logger.warning(f"--> _create_ledger->KeyValueStorageInMemory")
             txn_log_storage = KeyValueStorageInMemory()
 
+        logger.warning(f"<-- _create_ledger")
         return Ledger(CompactMerkleTree(hashStore=hash_store),
                       dataDir=self.data_location,
                       fileName=txn_file_name,
@@ -228,21 +242,26 @@ class LedgersBootstrap:
                       genesis_txn_initiator=genesis)
 
     def _create_domain_ledger(self) -> Ledger:
+        logger.warning(f"_create_domain_ledger")
         if self.config.primaryStorage is None:
             # TODO: add a place for initialization of all ledgers, so it's
             # clear what ledgers we have and how they are initialized
+            logger.warning(f"_create_domain_ledger->self._create_ledger")
             return self._create_ledger('domain', self.domain_genesis)
         else:
             # TODO: we need to rethink this functionality
+            logger.warning(f"_create_domain_ledger->initStorage")
             return initStorage(self.config.primaryStorage,
                                name=self.name + NODE_PRIMARY_STORAGE_SUFFIX,
                                dataDir=self.data_location,
                                config=self.config)
 
     def _create_state(self, name: str) -> PruningState:
+        logger.warning(f"_create_state")
         storage_name = getattr(self.config, "{}StateStorage".format(name))
         db_name = getattr(self.config, "{}StateDbName".format(name))
         if self.data_location is not None:
+            logger.warning(f"_create_state->PruningState: new")
             return PruningState(
                 initKeyValueStorage(
                     storage_name,
@@ -250,6 +269,7 @@ class LedgersBootstrap:
                     db_name,
                     db_config=self.config.db_state_config))
         else:
+            logger.warning(f"_create_state->PruningState: existing")
             return PruningState(KeyValueStorageInMemory())
 
     def _init_state_from_ledger(self, ledger_id: int):

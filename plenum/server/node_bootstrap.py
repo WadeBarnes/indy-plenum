@@ -29,41 +29,52 @@ class NodeBootstrap(LedgersBootstrap):
         self.node = node
 
     def init_state_ts_db_storage(self):
+        logger.warning(f"init_state_ts_db_storage")
         ts_storage = self.node._get_state_ts_db_storage()
         self.node.db_manager.register_new_store(TS_LABEL, ts_storage)
 
     def init_seq_no_db_storage(self):
+        logger.warning(f"init_seq_no_db_storage")
         seq_no_db_storage = self.node.loadSeqNoDB()
         self.node.db_manager.register_new_store(SEQ_NO_DB_LABEL, seq_no_db_storage)
 
     def init_node_status_db_storage(self):
+        logger.warning(f"init_node_status_db_storage")
         node_status_db = self.node.loadNodeStatusDB()
         self.node.db_manager.register_new_store(NODE_STATUS_DB_LABEL, node_status_db)
 
     def init_last_sent_pp_store(self):
+        logger.warning(f"init_last_sent_pp_store")
         last_sent_pp_store = LastSentPpStoreHelper(self.node)
         self.node.db_manager.register_new_store(LAST_SENT_PP_STORE_LABEL, last_sent_pp_store)
 
     def _init_storages(self, domain_storage):
+        logger.warning(f"_init_storages, domain_storage; {domain_storage}")
         super()._init_storages(domain_storage)
 
         # StateTsDbStorage
+        logger.warning(f"-> StateTsDbStorage")
         self.init_state_ts_db_storage()
 
         # seqNoDB storage
+        logger.warning(f"-> seqNoDBStorage")
         self.init_seq_no_db_storage()
 
         # nodeStatusDB
+        logger.warning(f"-> nodeStatusDB")
         self.init_node_status_db_storage()
 
         # last_sent_pp_store
+        logger.warning(f"-> last_sent_pp_store")
         self.init_last_sent_pp_store()
 
     def _init_bls_bft(self):
+        logger.warning(f"_init_bls_bft")
         super()._init_bls_bft()
         self.node.bls_bft = self.bls_bft
 
     def _create_bls_bft(self) -> BlsBft:
+        logger.warning(f"_create_bls_bft")
         bls_factory = create_default_bls_bft_factory(self.node)
         bls_bft = bls_factory.create_bls_bft()
         if bls_bft.can_sign_bls():
@@ -77,9 +88,11 @@ class NodeBootstrap(LedgersBootstrap):
         return bls_bft
 
     def _update_txn_with_extra_data(self, txn):
+        logger.warning(f"_update_txn_with_extra_data")
         return self.node.update_txn_with_extra_data(txn)
 
     def _init_common_managers(self):
+        logger.warning(f"_init_common_managers")
         # Pool manager init
         self.node.poolManager = TxnPoolManager(self.node,
                                                self.node.poolLedger,
@@ -99,11 +112,13 @@ class NodeBootstrap(LedgersBootstrap):
                                                 metrics=self.node.metrics)
 
     def register_ts_store_batch_handlers(self):
+        logger.warning(f"register_ts_store_batch_handlers")
         ts_store_b_h = TsStoreBatchHandler(self.node.db_manager)
         for lid in [DOMAIN_LEDGER_ID, CONFIG_LEDGER_ID]:
             self.node.write_manager.register_batch_handler(ts_store_b_h, ledger_id=lid)
 
     def _register_common_handlers(self):
+        logger.warning(f"_register_common_handlers")
         get_txn_handler = GetTxnHandler(self.node, self.node.db_manager)
         for lid in self.node.ledger_ids:
             self.node.read_manager.register_req_handler(get_txn_handler, ledger_id=lid)

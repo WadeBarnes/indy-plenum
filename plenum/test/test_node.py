@@ -318,8 +318,12 @@ class TestNode(TestNodeCore, Node):
         if kwargs.get('bootstrap_cls', None) is None:
             kwargs['bootstrap_cls'] = TestNodeBootstrap
 
+        logger.warning(f"Initialize the Node ...")
         Node.__init__(self, *args, **kwargs)
+
+        logger.warning(f"Initialize the TestNodeCore ...")
         TestNodeCore.__init__(self, *args, **kwargs)
+
         # Balances of all client
         self.balances = {}  # type: Dict[str, int]
 

@@ -162,6 +162,7 @@ class Node(HasActionQueue, Motor, Propagator, MessageProcessor, HasFileStorage,
         """
         Create a new node.
         """
+        logger.warning("Creating a new node ...")
         self.ha = ha
         self.cliname = cliname
         self.cliha = cliha
@@ -182,14 +183,18 @@ class Node(HasActionQueue, Motor, Propagator, MessageProcessor, HasFileStorage,
         self._info_tool = self._info_tool_class(self)
 
         # init database and request managers
+        logger.warning("Init database and request managers ...")
         self.db_manager = DatabaseManager()
         self.init_req_managers()
+
         # init storages and request handlers
+        logger.warning("Init storages and request handlers ...")
         self.bootstrapper = self._bootstrap_node(bootstrap_cls, storage)
 
         # ToDo: refactor this on pluggable req handler integration phase
         self.register_executer(POOL_LEDGER_ID, self.execute_pool_txns)
 
+        logger.warning("Init Motor ...")
         Motor.__init__(self)
 
         self.nodeReg = self.poolManager.nodeReg
@@ -311,7 +316,7 @@ class Node(HasActionQueue, Motor, Propagator, MessageProcessor, HasFileStorage,
 
         plugins_to_load = self.config.PluginsToLoad if hasattr(self.config, "PluginsToLoad") else None
         tp = loadPlugins(self.plugins_dir, plugins_to_load)
-        logger.info("total plugins loaded in node: {}".format(tp))
+        logger.warning("total plugins loaded in node: {}".format(tp))
         # TODO: this is already happening in `start`, why here then?
         self.logNodeInfo()
         self._wallet = None
@@ -321,12 +326,15 @@ class Node(HasActionQueue, Motor, Propagator, MessageProcessor, HasFileStorage,
 
         self._last_performance_check_data = {}
 
+        logger.warning("Init ledger manager ...")
         self.init_ledger_manager()
 
         self._observable = Observable()
         self._observer = NodeObserver(self)
 
         self._subscribe_to_internal_msgs()
+        logger.warning("Created a new node.")
+
 
     @property
     def last_completed_view_no(self):
@@ -3160,8 +3168,12 @@ class Node(HasActionQueue, Motor, Propagator, MessageProcessor, HasFileStorage,
         self.action_manager = ActionRequestManager()
 
     def _bootstrap_node(self, bootstrap_cls, storage):
+        
+        logger.warning(f"bootstrap_cls(self) ...")
         bootstrapper = bootstrap_cls(self)
-        bootstrapper.init(domain_storage=storage)
+        
+        logger.warning(f"bootstrapper.init(domain_storage=storage) ...")
+        bootstrapper.init(domain_storage=storage)        
         return bootstrapper
 
     def get_validators(self):

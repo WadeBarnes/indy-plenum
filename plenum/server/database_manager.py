@@ -7,6 +7,8 @@ from plenum.common.ledger import Ledger
 from plenum.server.txn_version_controller import TxnVersionController
 from state.state import State
 
+import logging
+logger = logging.getLogger()
 
 class DatabaseManager():
     def __init__(self):
@@ -21,8 +23,16 @@ class DatabaseManager():
         self._states = {lid: db.state for lid, db in self.databases.items() if db.state}
 
     def register_new_database(self, lid, ledger: Ledger, state: Optional[State] = None, taa_acceptance_required=True):
+        logger.warning(f"register_new_database:")
+        logger.warning(f"  - lid: {lid}")
+        logger.warning(f"  - ledger: {ledger}")
+        logger.warning(f"  - state: {state}")
+        logger.warning(f"  - taa_acceptance_required: {taa_acceptance_required}")
         if lid in self.databases:
+            logger.error(f"Trying to add already existing database")
             raise LogicError('Trying to add already existing database')
+
+        logger.warning(f"Creating new database; {lid} ...")
         self.databases[lid] = Database(ledger, state, taa_acceptance_required=taa_acceptance_required)
         self._init_db_list()
 
