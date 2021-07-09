@@ -13,6 +13,8 @@ from storage.kv_store import KeyValueStorage
 from storage.helper import initKeyValueStorageIntKeys
 from plenum.common.config_util import getConfig
 
+import logging
+logger = logging.getLogger()
 
 class Ledger(ImmutableStore):
     @staticmethod
@@ -22,7 +24,9 @@ class Ledger(ImmutableStore):
                       open=True,
                       config=None,
                       read_only=False) -> KeyValueStorage:
+        logging.warning("-> _defaultStore")
         config = config or getConfig()
+        logging.warning("<- _defaultStore")
         return initKeyValueStorageIntKeys(config.transactionLogDefaultStorage,
                                           dataDir, logName, open, read_only=read_only,
                                           db_config=config.db_transactions_config,
@@ -47,6 +51,7 @@ class Ledger(ImmutableStore):
         :param fileName: the name of the transaction log file
         :param genesis_txn_initiator: file or dir to use for initialization of transaction log store
         """
+        logger.warning(f"-> super() Init Ledger")
         self.genesis_txn_initiator = genesis_txn_initiator
 
         self.dataDir = dataDir
@@ -62,10 +67,13 @@ class Ledger(ImmutableStore):
         self.ensureDurability = ensureDurability
         self._customTransactionLogStore = transactionLogStore
         self.seqNo = 0
+        logger.warning(f"start")
         self.start()
+        logger.warning(f"recoverTree")
         self.recoverTree()
         if self.genesis_txn_initiator and self.size == 0:
             self.genesis_txn_initiator.init_ledger_from_genesis_txn(self)
+        logger.warning(f"<- super() Init Ledger")
 
     def recoverTree(self):
         # TODO: Should probably have 2 classes of hash store,
@@ -217,11 +225,16 @@ class Ledger(ImmutableStore):
         }
 
     def start(self, loop=None, ensureDurability=True):
+        logger.warning(f"-> start")
         if self._transactionLog and not self._transactionLog.closed:
+            logger.warning(f"Ledger already started.")
             logging.debug("Ledger already started.")
         else:
+            logger.warning(f"Starting ledger...")
             logging.info("Starting ledger...")
             ensureDurability = ensureDurability or self.ensureDurability
+
+            logger.warning(f"self._transactionLog")
             self._transactionLog = \
                 self._customTransactionLogStore or \
                 self._defaultStore(self.dataDir,
@@ -229,10 +242,18 @@ class Ledger(ImmutableStore):
                                    ensureDurability,
                                    config=self.config,
                                    read_only=self._read_only)
+
+            logger.warning(f"if self._transactionLog.closed:")
             if self._transactionLog.closed:
                 self._transactionLog.open()
+
+            logger.warning(f"if self.tree.hashStore.closed:")
             if self.tree.hashStore.closed:
                 self.tree.hashStore.open()
+            logger.warning(f"Ledger started ...")
+
+        logger.warning(f"<- start")
+
 
     def stop(self):
         self._transactionLog.close()

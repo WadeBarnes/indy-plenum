@@ -12,12 +12,14 @@ logger = getlogger()
 
 class Ledger(_Ledger):
     def __init__(self, *args, **kwargs):
+        logger.warning("-> Init Ledger")
         super().__init__(*args, **kwargs)
         # Merkle tree of containing transactions that have not yet been
         # committed but optimistically applied.
         self.uncommittedTxns = []
         self.uncommittedRootHash = None
         self.uncommittedTree = None
+        logger.warning("<- Init Ledger")
 
     @property
     def uncommitted_size(self) -> int:

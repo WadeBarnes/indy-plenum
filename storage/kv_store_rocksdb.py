@@ -6,6 +6,9 @@ import shutil
 from storage.kv_store import KeyValueStorage
 from state.util.utils import removeLockFiles
 
+import logging
+logger = logging.getLogger()
+
 try:
     import rocksdb
 except ImportError:
@@ -14,14 +17,23 @@ except ImportError:
 
 class KeyValueStorageRocksdb(KeyValueStorage):
     def __init__(self, db_dir, db_name, open=True, read_only=False, db_config=None):
+        logger.warning(f"-> Init KeyValueStorageRocksdb")
+        
         if 'rocksdb' not in globals():
+            logger.warning(f"Error: Rocksdb is needed to use this class")
             raise RuntimeError('Rocksdb is needed to use this class')
         self._db_path = os.path.join(db_dir, db_name)
         self._read_only = read_only
         self._db = None
         self._db_config = db_config
         if open:
-            self.open()
+            logger.warning(f"Init KeyValueStorageRocksdb -> open")
+            try:
+                self.open()
+            except:
+                logger.error(f"Error: Init KeyValueStorageRocksdb -> open")
+            logger.warning(f"Init KeyValueStorageRocksdb <- open")
+        logger.warning(f"<- Init KeyValueStorageRocksdb")
 
     def __apply_db_config_opts(self, opts):
         if self._db_config is None:
@@ -80,8 +92,14 @@ class KeyValueStorageRocksdb(KeyValueStorage):
         return opts
 
     def open(self):
+        logger.warn(f"-> open")
+        
+        logger.warn(f"self._get_db_opts()")
         opts = self._get_db_opts()
+
+        logger.warn(f"rocksdb.DB(self._db_path, opts, read_only=self._read_only)")
         self._db = rocksdb.DB(self._db_path, opts, read_only=self._read_only)
+        logger.warn(f"<- open")
 
     def __repr__(self):
         return self._db_path

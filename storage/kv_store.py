@@ -1,6 +1,8 @@
 from abc import abstractmethod, ABCMeta
 from typing import Tuple, Iterable
 
+import logging
+logger = logging.getLogger()
 
 class KeyValueStorage(metaclass=ABCMeta):
     WRITE_OP = 1
@@ -28,7 +30,9 @@ class KeyValueStorage(metaclass=ABCMeta):
 
     @abstractmethod
     def open(self):
+        logger.warning(f"-> @abstractmethod-open")
         pass
+        logger.warning(f"<- @abstractmethod-open")
 
     @abstractmethod
     def close(self):

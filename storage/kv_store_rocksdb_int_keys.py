@@ -1,6 +1,9 @@
 from storage.helper import integer_comparator
 from storage.kv_store_rocksdb import KeyValueStorageRocksdb
 
+import logging
+logger = logging.getLogger()
+
 try:
     import rocksdb
 except ImportError:
@@ -17,8 +20,10 @@ class IntegerComparator(rocksdb.IComparator):
 
 class KeyValueStorageRocksdbIntKeys(KeyValueStorageRocksdb):
     def __init__(self, db_dir, db_name, open=True, read_only=False, db_config=None):
+        logging.warning(f"-> Init KeyValueStorageRocksdbIntKeys")
         super().__init__(db_dir, db_name, open, read_only, db_config)
         self._read_only = read_only
+        logging.warning(f"<- Init KeyValueStorageRocksdbIntKeys")
 
     def open(self):
         opts = self._get_db_opts()

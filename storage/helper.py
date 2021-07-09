@@ -16,6 +16,8 @@ from storage.chunked_file_store import ChunkedFileStore
 from storage.kv_in_memory import KeyValueStorageInMemory
 from storage.kv_store import KeyValueStorage
 
+import logging
+logger = logging.getLogger()
 
 def initKeyValueStorage(keyValueType, dataLocation, keyValueStorageName,
                         open=True, read_only=False, db_config=None, txn_serializer=None) -> KeyValueStorage:
@@ -60,12 +62,17 @@ def initKeyValueStorage(keyValueType, dataLocation, keyValueStorageName,
 
 def initKeyValueStorageIntKeys(keyValueType, dataLocation, keyValueStorageName,
                                open=True, read_only=False, db_config=None, txn_serializer=None) -> KeyValueStorage:
+    
+    logger.warning(f"-> initKeyValueStorageIntKeys: {keyValueType}")
     from storage.kv_store_leveldb_int_keys import KeyValueStorageLeveldbIntKeys
     from storage.kv_store_rocksdb_int_keys import KeyValueStorageRocksdbIntKeys
     if keyValueType == KeyValueStorageType.Leveldb:
+        logger.warning(f"KeyValueStorageLeveldbIntKeys")
         return KeyValueStorageLeveldbIntKeys(dataLocation, keyValueStorageName, open, read_only)
     if keyValueType == KeyValueStorageType.Rocksdb:
+        logger.warning(f"KeyValueStorageRocksdbIntKeys")
         return KeyValueStorageRocksdbIntKeys(dataLocation, keyValueStorageName, open, read_only, db_config)
+    logger.warning(f"initKeyValueStorage")
     return initKeyValueStorage(keyValueType, dataLocation, keyValueStorageName, open, read_only, db_config, txn_serializer)
 
 

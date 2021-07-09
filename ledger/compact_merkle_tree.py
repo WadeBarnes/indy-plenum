@@ -30,24 +30,31 @@ class CompactMerkleTree(merkle_tree.MerkleTree):
         logger.warning(f"hashStore: {hashStore}")
         self.__hashStore = hashStore or MemoryHashStore()  # type: HashStore
         self.__hasher = hasher
-        logger.warning(f"hashStore: {hashStore}")
+        logger.warning(f"Update")
         self._update(tree_size, hashes)
+        logger.warning(f"CompactMerkleTree")
 
     @property
     def hashStore(self):
         return self.__hashStore
 
     def _update(self, tree_size: int, hashes: Sequence[bytes]):
+        logger.warning(f"-> _update")
         bits_set = count_bits_set(tree_size)
         num_hashes = len(hashes)
+
         if num_hashes != bits_set:
+            logger.warning(f"Error: number of hashes != bits set in tree_size")
             msgfmt = "number of hashes != bits set in tree_size: %s vs %s"
             raise ValueError(msgfmt % (num_hashes, bits_set))
+
         self.__tree_size = tree_size
         self.__hashes = tuple(hashes)
         # height of the smallest subtree, or 0 if none exists (empty tree)
+        logger.warning(f"_update -> lowest_bit_set")
         self.__mintree_height = lowest_bit_set(tree_size)
         self.__root_hash = None
+        logger.warning(f"<- _update")
 
     def load(self, other: merkle_tree.MerkleTree):
         """Load this tree from a dumb data object for serialisation.
