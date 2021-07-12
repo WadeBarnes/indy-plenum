@@ -36,6 +36,7 @@ def test_catchup_with_lost_ledger_status(txnPoolNodeSet,
 
     node_to_disconnect = txnPoolNodeSet[-1]
     
+    logger.warning(f"lost_count: {lost_count}")
     logger.warning(f"txnPoolNodeSet: {txnPoolNodeSet}")
     logger.warning(f"looper: {looper}")
     logger.warning(f"sdk_pool_handle: {sdk_pool_handle}")
@@ -44,7 +45,6 @@ def test_catchup_with_lost_ledger_status(txnPoolNodeSet,
     logger.warning(f"tdir: {tdir}")
     logger.warning(f"allPluginsPath: {allPluginsPath}")
     logger.warning(f"monkeypatch: {monkeypatch}")
-    logger.warning(f"lost_count: {lost_count}")
     logger.warning(f"node_to_disconnect: {node_to_disconnect}")
 
     logger.warning(f"sdk_send_random_and_check")

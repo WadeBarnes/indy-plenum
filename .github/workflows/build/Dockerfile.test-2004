@@ -1,0 +1,6 @@
+# FROM ghcr.io/udosson/indy-plenum/plenum-build:ubuntu-2004
+FROM plenum-build:2004
+
+WORKDIR /home/indy/indy-plenum
+COPY . /home/indy/indy-plenum
+RUN pip install .[tests]

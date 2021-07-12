@@ -92,6 +92,15 @@ def bytearray_to_bytestr(value):
 isnumeric = is_numeric
 
 
+def lockFilesExist(dbPath: str) -> bool:
+    lock_files_exist = False
+    if os.path.isdir(dbPath):
+        lockFilePath = os.path.join(dbPath, 'LOCK')
+        if os.path.isfile(lockFilePath):
+            lock_files_exist = True
+    return lock_files_exist
+
+
 def removeLockFiles(dbPath):
     if os.path.isdir(dbPath):
         lockFilePath = os.path.join(dbPath, 'LOCK')

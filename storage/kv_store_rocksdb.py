@@ -4,7 +4,7 @@ from typing import Iterable, Tuple
 
 import shutil
 from storage.kv_store import KeyValueStorage
-from state.util.utils import removeLockFiles
+from state.util.utils import lockFilesExist, removeLockFiles
 
 import logging
 logger = logging.getLogger()
@@ -34,6 +34,13 @@ class KeyValueStorageRocksdb(KeyValueStorage):
                 logger.error(f"Error: Init KeyValueStorageRocksdb -> open")
             logger.warning(f"Init KeyValueStorageRocksdb <- open")
         logger.warning(f"<- Init KeyValueStorageRocksdb")
+
+    def __del__(self):
+        if not self.closed:
+            self.drop()
+        if os.path.isdir(self.db_path):
+            shutil.rmtree(self._db_path)
+            removeLockFiles(self._db_path)
 
     def __apply_db_config_opts(self, opts):
         if self._db_config is None:
@@ -92,14 +99,16 @@ class KeyValueStorageRocksdb(KeyValueStorage):
         return opts
 
     def open(self):
-        logger.warn(f"-> open")
-        
-        logger.warn(f"self._get_db_opts()")
-        opts = self._get_db_opts()
+        logger.warning(f"-> open")
 
-        logger.warn(f"rocksdb.DB(self._db_path, opts, read_only=self._read_only)")
+        if os.path.isdir(self.db_path): 
+            logger.warning(f"rocksdb database already exists.")
+            if lockFilesExist(self.db_path):
+                logger.warning(f"rocksdb database lock files exist.")
+            
+        opts = self._get_db_opts()
         self._db = rocksdb.DB(self._db_path, opts, read_only=self._read_only)
-        logger.warn(f"<- open")
+        logger.warning(f"<- open")
 
     def __repr__(self):
         return self._db_path
@@ -145,13 +154,17 @@ class KeyValueStorageRocksdb(KeyValueStorage):
         self._db.write(b, sync=False)
 
     def close(self):
-        del self._db
+        logger.warning(f"-> close")
+        self._db.close()
         self._db = None
         removeLockFiles(self._db_path)
+        logger.warning(f"<- close")
 
     def drop(self):
+        logger.warning(f"-> drop")
         self.close()
         shutil.rmtree(self._db_path)
+        logger.warning(f"<- drop")
 
     def reset(self):
         self.drop()
