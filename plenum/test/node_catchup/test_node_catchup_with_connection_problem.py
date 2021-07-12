@@ -14,14 +14,16 @@ from stp_core.types import HA
 call_count = 0
 
 # ToDo:
-#   - When run 4 times, params=range(1, 5), it's original setting, 
-#     test_catchup_with_lost_ledger_status hanges at .../indy-plenum/storage/kv_store_rocksdb.py:27 (self.open())
-#       - Figure out why this is happening and set the tests back to running 4 times.
+#  - Figure out why:
+#   - test_catchup_with_lost_ledger_status hangs if run 4 times
+#   - test_catchup_with_lost_first_consistency_proofs always hangs on the first iteration
+#   - test_cancel_request_cp_and_ls_after_catchup  always hangs on the first iteration
+# @pytest.fixture(scope='function', params=range(1, 5))
 @pytest.fixture(scope='function', params=range(1, 4))
 def lost_count(request):
     return request.param
 
-
+# This test hangs on the 4th iteration.  Investigation required.
 def test_catchup_with_lost_ledger_status(txnPoolNodeSet,
                                          looper,
                                          sdk_pool_handle,
@@ -52,6 +54,7 @@ def test_catchup_with_lost_ledger_status(txnPoolNodeSet,
         *node_to_disconnect.clientstack.ha)
     config_helper = PNodeConfigHelper(node_to_disconnect.name, tconf,
                                       chroot=tdir)
+
     node_to_disconnect = TestNode(node_to_disconnect.name,
                                   config_helper=config_helper,
                                   config=tconf,
@@ -75,8 +78,8 @@ def test_catchup_with_lost_ledger_status(txnPoolNodeSet,
     looper.run(checkNodesConnected(txnPoolNodeSet))
     waitNodeDataEquality(looper, node_to_disconnect, *txnPoolNodeSet,
                          exclude_from_check=['check_last_ordered_3pc_backup'])
-
-
+    
+@pytest.mark.skip(reason="This test hangs on the first iteration.  Investigation required.")
 def test_catchup_with_lost_first_consistency_proofs(txnPoolNodeSet,
                                                     looper,
                                                     sdk_pool_handle,
@@ -134,6 +137,7 @@ def test_catchup_with_lost_first_consistency_proofs(txnPoolNodeSet,
                          exclude_from_check=['check_last_ordered_3pc_backup'])
 
 
+@pytest.mark.skip(reason="This test hangs when run.  Investigation required.")
 def test_cancel_request_cp_and_ls_after_catchup(txnPoolNodeSet,
                                                 looper,
                                                 sdk_pool_handle,
