@@ -21,8 +21,9 @@ call_count = 0
 #   - test_catchup_with_lost_ledger_status hangs if run 4 times
 #   - test_catchup_with_lost_first_consistency_proofs always hangs on the first iteration
 #   - test_cancel_request_cp_and_ls_after_catchup  always hangs on the first iteration
-# @pytest.fixture(scope='function', params=range(1, 5))
-@pytest.fixture(scope='function', params=range(1, 4))
+#  - https://github.com/hyperledger/indy-plenum/issues/1546
+@pytest.fixture(scope='function', params=range(1, 5))
+# @pytest.fixture(scope='function', params=range(1, 4))
 def lost_count(request):
     return request.param
 
