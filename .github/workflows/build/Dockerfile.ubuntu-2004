@@ -3,19 +3,24 @@ FROM ubuntu:20.04
 ARG uid=1000
 ARG user=indy
 
+RUN apt-get update && apt-get install -y gnupg \
+    apt-transport-https \
+    ca-certificates \
+    apt-utils 
+ 
+RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys CE7709D068DB5E88 
+
+RUN echo "deb https://repo.sovrin.org/deb xenial master" >> /etc/apt/sources.list
+
 RUN apt-get update -y && apt-get install -y \
     # common stuff
     git \
     wget \
-    apt-transport-https \
-    ca-certificates \
-    apt-utils \
     # Python
     python3-pip \
     python3-nacl \
     # rocksdb python wrapper
-    librocksdb5.17 \
-    librocksdb-dev \
+    rocksdb \
     libsnappy-dev \
     liblz4-dev \
     libbz2-dev \
@@ -69,9 +74,7 @@ RUN pip3 install -U \
     pytest-runner==5.3.0 \
     pytest-xdist==2.2.1 \
     python-dateutil==2.8.1 \
-    # python-rocksdb==0.7.0 \
-    # git+https://github.com/twmht/python-rocksdb.git#egg=python-rocksdb \
-    git+https://github.com/alexreg/python-rocksdb.git@fix_close_segfault#egg=python-rocksdb \
+    python-rocksdb==0.7.0 \
     python-ursa==0.1.1 \
     python3-indy==1.16.0 \
     pyzmq==18.1.0 \
@@ -97,8 +100,7 @@ RUN echo "deb http://security.ubuntu.com/ubuntu bionic-security main"  >> /etc/a
     apt-get update && apt-get install -y \ 
     libssl1.0.0
 # Indy Node and Plenum
-RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys CE7709D068DB5E88 && \
-    echo "deb https://repo.sovrin.org/deb bionic master" >> /etc/apt/sources.list && \
+RUN echo "deb https://repo.sovrin.org/deb bionic master" >> /etc/apt/sources.list && \
     apt-get update && apt-get install -y \ 
     ursa=0.3.2-1
 

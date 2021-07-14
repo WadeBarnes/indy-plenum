@@ -155,7 +155,6 @@ class KeyValueStorageRocksdb(KeyValueStorage):
 
     def close(self):
         logger.warning(f"-> close")
-        self._db.close()
         self._db = None
         removeLockFiles(self._db_path)
         logger.warning(f"<- close")
