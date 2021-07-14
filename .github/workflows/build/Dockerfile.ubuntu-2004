@@ -10,6 +10,9 @@ RUN apt-get update && apt-get install -y gnupg \
  
 RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys CE7709D068DB5E88 
 
+# PoC for dependancy pinning workaround for issues with RocksDB 5.17, proposed here:
+#  - https://github.com/hyperledger/indy-plenum/issues/1546
+#  - Needed to pick up rocksdb=5.8.8
 RUN echo "deb https://repo.sovrin.org/deb xenial master" >> /etc/apt/sources.list
 
 RUN apt-get update -y && apt-get install -y \
@@ -20,7 +23,7 @@ RUN apt-get update -y && apt-get install -y \
     python3-pip \
     python3-nacl \
     # rocksdb python wrapper
-    rocksdb \
+    rocksdb=5.8.8 \
     libsnappy-dev \
     liblz4-dev \
     libbz2-dev \
