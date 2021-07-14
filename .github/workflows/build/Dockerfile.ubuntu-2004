@@ -3,19 +3,24 @@ FROM ubuntu:20.04
 ARG uid=1000
 ARG user=indy
 
+RUN apt-get update && apt-get install -y gnupg \
+    apt-transport-https \
+    ca-certificates \
+    apt-utils 
+ 
+RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys CE7709D068DB5E88 
+
+RUN echo "deb https://repo.sovrin.org/deb xenial master" >> /etc/apt/sources.list
+
 RUN apt-get update -y && apt-get install -y \
     # common stuff
     git \
     wget \
-    apt-transport-https \
-    ca-certificates \
-    apt-utils \
     # Python
     python3-pip \
     python3-nacl \
     # rocksdb python wrapper
-    librocksdb5.17 \
-    librocksdb-dev \
+    rocksdb \
     libsnappy-dev \
     liblz4-dev \
     libbz2-dev \
@@ -94,12 +99,11 @@ RUN pip3 install -U \
 RUN echo "deb http://security.ubuntu.com/ubuntu bionic-security main"  >> /etc/apt/sources.list && \
     apt-get update && apt-get install -y \ 
     libssl1.0.0
+
 # Indy Node and Plenum
-RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys CE7709D068DB5E88 && \
-    echo "deb https://repo.sovrin.org/deb bionic master" >> /etc/apt/sources.list && \
+RUN echo "deb https://repo.sovrin.org/deb bionic master" >> /etc/apt/sources.list && \
     apt-get update && apt-get install -y \ 
     ursa=0.3.2-1
-
 
 # Need to move libursa.so to parent dir
 RUN mv /usr/lib/ursa/* /usr/lib && rm -rf /usr/lib/ursa
