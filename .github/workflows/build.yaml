@@ -358,9 +358,8 @@ jobs:
           ./build-scripts/ubuntu-1604/build-3rd-parties.sh ./cache/3rd-party-dependencies
           mv ./build-scripts/ubuntu-1604/cache/* /tmp/third-party-dependencies
 
-  
   build-python-packages:
-    name: Build and Publish Python Packages to PyPI
+    name: Build Python Packages
     runs-on: ubuntu-20.04
     needs: [workflow-setup, indy_plenum_tests, indy_plenum_module_tests, lint]
     steps:
@@ -373,9 +372,9 @@ jobs:
           python-version: 3.5
 
       - name: Install required packages via pip
-        run: | 
-          python3 -m pip install pytest-runner wheel pip==9.0.3 
-          
+        run: |
+          python3 -m pip install pytest-runner wheel pip==9.0.3
+
       - name: Set Build Version
         id: version
         uses: ./.github/actions/set-version
@@ -383,7 +382,7 @@ jobs:
           moduleName: plenum
           isDev: ${{ needs.workflow-setup.outputs.isDev }}
           isRC: ${{ needs.workflow-setup.outputs.isRC }}
-          
+
       - name: Prepare package and set version
         run: |
           # ToDo - Update hard coded 'ubuntu-16-04' tag when integrating these flows with the ubuntu-20.04-upgrade branch.
@@ -462,5 +461,3 @@ jobs:
         with:
           user: __token__
           password: ${{ secrets.PYPI_API_TOKEN }}
-        
-
