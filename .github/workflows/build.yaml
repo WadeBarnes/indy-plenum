@@ -358,10 +358,52 @@ jobs:
           ./build-scripts/ubuntu-1604/build-3rd-parties.sh ./cache/3rd-party-dependencies
           mv ./build-scripts/ubuntu-1604/cache/* /tmp/third-party-dependencies
 
+  
+  build-python-packages:
+    name: Build and Publish Python Packages to PyPI
+    runs-on: ubuntu-20.04
+    needs: [workflow-setup, indy_plenum_tests, indy_plenum_module_tests, lint]
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v1
+
+      - name: Set up Python 3.5
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.5
+
+      - name: Install required packages via pip
+        run: | 
+          python3 -m pip install pytest-runner wheel pip==9.0.3 
+          
+      - name: Set Build Version
+        id: version
+        uses: ./.github/actions/set-version
+        with:
+          moduleName: plenum
+          isDev: ${{ needs.workflow-setup.outputs.isDev }}
+          isRC: ${{ needs.workflow-setup.outputs.isRC }}
+          
+      - name: Prepare package and set version
+        run: |
+          # ToDo - Update hard coded 'ubuntu-16-04' tag when integrating these flows with the ubuntu-20.04-upgrade branch.
+          ./build-scripts/ubuntu-1604/prepare-package.sh . plenum "${{ steps.version.outputs.upstreamVer }}" python-packages
+
+      - name: Building python package
+        run: |
+          python3 setup.py sdist --dist-dir /tmp/dist bdist_wheel --dist-dir /tmp/dist
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: plenum-python
+          path: /tmp/dist
+          retention-days: 5
+
+
   publish_artifacts:
     name: Publish Artifacts
     runs-on: ubuntu-20.04
-    needs: [workflow-setup, build_release, build_3rd_party_dependencies]
+    needs: [workflow-setup, build_release, build_3rd_party_dependencies, build-python-packages]
     if: needs.workflow-setup.outputs.publish == 'true'
     env:
       GITHUB_REF: ${{ needs.workflow-setup.outputs.GITHUB_REF }}
@@ -409,42 +451,16 @@ jobs:
           distribution: xenial
           component: ${{ env.GITHUB_REF }}
 
-  build-n-publish-PyPI:
-    name: Build and Publish Python Packages to PyPI
-    runs-on: ubuntu-20.04
-    needs: [workflow-setup, indy_plenum_tests, indy_plenum_module_tests, lint]
-    if: needs.workflow-setup.outputs.publish == 'true'
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v1
-
-      - name: Set up Python 3.5
-        uses: actions/setup-python@v2
+      - name: Download Python Packages from Pipeline Artifacts
+        uses: actions/download-artifact@v2
         with:
-          python-version: 3.5
+          name: plenum-python
+          path: dist
 
-      - name: Install required packages via pip
-        run: | 
-          python3 -m pip install pytest-runner wheel pip==9.0.3 
-
-      - name: Set Build Version
-        id: version
-        uses: ./.github/actions/set-version
-        with:
-          moduleName: plenum
-          isDev: ${{ needs.workflow-setup.outputs.isDev }}
-          isRC: ${{ needs.workflow-setup.outputs.isRC }}
-
-      - name: Prepare package and set version
-        run: |
-          ./build-scripts/ubuntu-1604/prepare-package.sh . plenum "${{ steps.version.outputs.upstreamVer }}" python-packages
-
-      - name: Building python package
-        run: |
-          python3 setup.py sdist bdist_wheel 
-
-      - name: Publish package to PyPI
+      - name: Publish Python Package to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           user: __token__
           password: ${{ secrets.PYPI_API_TOKEN }}
+        
+
