@@ -8,12 +8,19 @@ RUN apt-get update && apt-get install -y gnupg \
     ca-certificates \
     apt-utils 
  
+
+
+# Hyperledger
+RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 9692C00E657DDE61
+RUN echo "deb  https://hyperledger.jfrog.io/artifactory/indy focal dev"  >> /etc/apt/sources.list
+
+# Sovrin
 RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys CE7709D068DB5E88 
 
-# PoC for dependancy pinning workaround for issues with RocksDB 5.17, proposed here:
-#  - https://github.com/hyperledger/indy-plenum/issues/1546
-#  - Needed to pick up rocksdb=5.8.8
-RUN echo "deb https://repo.sovrin.org/deb xenial master" >> /etc/apt/sources.list
+# # PoC for dependancy pinning workaround for issues with RocksDB 5.17, proposed here:
+# #  - https://github.com/hyperledger/indy-plenum/issues/1546
+# #  - Needed to pick up rocksdb=5.8.8
+# RUN echo "deb https://repo.sovrin.org/deb xenial master" >> /etc/apt/sources.list
 
 RUN apt-get update -y && apt-get install -y \
     # common stuff
