@@ -373,7 +373,7 @@ jobs:
 
       - name: Install required packages via pip
         run: |
-          python3 -m pip install pytest-runner wheel pip==9.0.3
+          python3 -m pip install pytest-runner wheel
 
       - name: Set Build Version
         id: version
