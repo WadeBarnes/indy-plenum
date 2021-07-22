@@ -6,6 +6,7 @@ RUN apt-get update -y && apt-get install -y \
     # common stuff
     git \
     wget \
+    gnupg \
     apt-transport-https \
     ca-certificates \
     apt-utils
