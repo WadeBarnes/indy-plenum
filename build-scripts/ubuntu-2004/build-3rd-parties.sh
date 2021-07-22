@@ -5,6 +5,23 @@ set -x
 
 OUTPUT_PATH=${1:-.}
 
+function build_rocksdb_deb {
+    VERSION=$1
+    VERSION_TAG="rocksdb-$VERSION"
+
+    git clone https://github.com/evernym/rocksdb.git /tmp/rocksdb
+    cd /tmp/rocksdb
+    git checkout $VERSION_TAG
+    sed -i 's/-m rocksdb@fb.com/-m "Hyperledger <hyperledger-indy@lists.hyperledger.org>"/g' \
+        ./build_tools/make_package.sh
+    PORTABLE=1 EXTRA_CFLAGS="-fPIC" EXTRA_CXXFLAGS="-fPIC" ./build_tools/make_package.sh $VERSION
+    # Install it in the system as it is needed by python-rocksdb.
+    make install
+    cd -
+    cp /tmp/rocksdb/package/rocksdb_${VERSION}_amd64.deb $OUTPUT_PATH
+    rm -rf /tmp/rocksdb
+}
+
 function build_from_pypi {
     PACKAGE_NAME=$1
 
@@ -66,6 +83,12 @@ function build_from_pypi {
 # TODO duplicates list from Jenkinsfile.cd
 SCRIPT_PATH="${BASH_SOURCE[0]}"
 pushd `dirname ${SCRIPT_PATH}` >/dev/null
+
+
+# Build rocksdb at first
+### Can be removed once the code has been updated to run with rocksdb v. 5.17
+### Issue 1551: Update RocksDB; https://github.com/hyperledger/indy-plenum/issues/1551
+build_rocksdb_deb 5.8.8
 
 
 #### PyZMQCommand
