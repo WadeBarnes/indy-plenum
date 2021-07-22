@@ -2,23 +2,32 @@ FROM ubuntu:20.04
 
 ARG uid=1000
 ARG user=indy
-
 RUN apt-get update -y && apt-get install -y \
     # common stuff
     git \
     wget \
     apt-transport-https \
     ca-certificates \
-    apt-utils \
+    apt-utils
+
+# Hyperledger
+#  - https://github.com/hyperledger/indy-plenum/issues/1546
+#  - Needed to pick up rocksdb=5.8.8
+RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 9692C00E657DDE61
+RUN echo "deb  https://hyperledger.jfrog.io/artifactory/indy focal dev"  >> /etc/apt/sources.list
+
+RUN apt-get update -y && apt-get install -y \
     # Python
     python3-pip \
     python3-nacl \
     # rocksdb python wrapper
-    librocksdb5.17 \
-    librocksdb-dev \
+    rocksdb=5.8.8 \
+    libgflags-dev \
     libsnappy-dev \
-    liblz4-dev \
+    zlib1g-dev \
     libbz2-dev \
+    liblz4-dev \
+    libgflags-dev \
     # zstd is needed for caching in github actions pipeline
     zstd \
     # fpm
