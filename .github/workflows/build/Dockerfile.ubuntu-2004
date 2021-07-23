@@ -64,7 +64,7 @@ RUN pip3 install -U \
     Pygments==2.2.0 \
     Pympler==0.8 \
     # pip==9.0.3 \
-    # pluggy==0.13.1 \
+    pluggy==0.13.1 \
     portalocker==2.2.1 \
     # prompt-toolkit==3.0.18 \
     psutil==5.6.6 \
