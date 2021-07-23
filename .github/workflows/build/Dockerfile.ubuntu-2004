@@ -52,12 +52,12 @@ RUN pip3 install -U \
     # needs to be installed because from python 3.8: "importlib_metadata supplies a backport of importlib.metadata as found in Python 3.8 and later for earlier Python releases. Users of Python 3.8 and beyond are encouraged to use the standard library module when possible and fall back to importlib_metadata when necessary"
     importlib_metadata>=2.0 \
     iniconfig==1.1.1 \
-    # intervaltree==2.1.0 \
+    intervaltree==2.1.0 \
     ioflo==2.0.2 \
     jsonpickle==2.0.0 \
     leveldb==0.201 \
     libnacl==1.7.2 \
-    mccabe==0.6.1 \
+    # mccabe==0.6.1 \
     msgpack-python==0.5.6 \
     orderedset==2.0.3 \
     packaging==20.9 \
