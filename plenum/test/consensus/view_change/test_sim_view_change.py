@@ -30,7 +30,7 @@ def filter(request):
 
 
 @pytest.fixture(params=Random().sample([seed for seed in range(1000000)
-                                        if seed not in {440868, 925547, 444939, 701549, 833247, 278940, 565429, 860733}], 100))
+                                        if seed not in {440868, 925547, 444939, 701549, 833247, 278940, 565429, 860733, 465178}], 100))
 def custom_random(request):
     return DefaultSimRandom(request.param)
 
@@ -39,7 +39,7 @@ def test_view_change_completes_under_normal_conditions_default_seeds(random, lat
     check_view_change_completes_under_normal_conditions(random, *latency, *filter)
 
 
-@pytest.mark.parametrize(argnames="seed", argvalues=[290370, 749952, 348636, 919685, 674863, 378187])
+@pytest.mark.parametrize(argnames="seed", argvalues=[290370, 749952, 348636, 919685, 674863, 378187, 465178])
 def test_view_change_completes_under_normal_conditions_regression_seeds(seed, latency, filter):
     random = DefaultSimRandom(seed)
     check_view_change_completes_under_normal_conditions(random, *latency, *filter)
