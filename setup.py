@@ -96,7 +96,7 @@ setup(
 
     install_requires=[
                         'base58',
-                        'intervaltree>=2.1.0',
+                        # 'intervaltree>=2.1.0',
                         'ioflo',
                         'jsonpickle',
                         'leveldb>=0.201',
@@ -117,7 +117,7 @@ setup(
                         'portalocker>=2.2.1',
                         'prompt_toolkit>=3.0.16',
                         'psutil>=5.6.6',
-                        'pygments>=2.2.0',
+                        # 'pygments>=2.2.0',
                         'pympler>=0.8',
                         'python-dateutil',
                         'python-rocksdb',
