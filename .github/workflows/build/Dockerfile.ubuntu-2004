@@ -94,7 +94,7 @@ RUN pip3 install -U \
     toml==0.10.2 \
     ujson==1.33 \
     wcwidth==0.2.5 \
-    wheel==0.34.2 \
+    wheel==0.34.2 
     # zipp==1.2.0
 
 # fails when executed in one command with other pip install packages
