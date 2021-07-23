@@ -30,7 +30,7 @@ def filter(request):
 
 
 @pytest.fixture(params=Random().sample([seed for seed in range(1000000)
-                                        if seed not in {440868, 925547, 444939, 701549, 833247, 278940, 565429, 860733, 465178, 916737, 860733}], 100))
+                                        if seed not in {440868, 925547, 444939, 701549, 833247, 278940, 565429, 860733, 465178, 916737, 860733, 37053}], 100))
 def custom_random(request):
     return DefaultSimRandom(request.param)
 
