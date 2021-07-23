@@ -41,10 +41,10 @@ RUN apt-get update -y && apt-get install -y \
 
 # pypi based packages
 RUN pip3 install -U \ 
-    # apipkg==1.5 \
+    apipkg==1.5 \
     attrs==20.3.0 \
     base58==2.1.0 \
-    distro==1.5.0 \
+    # distro==1.5.0 \
     execnet==1.8.0 \
     # flake8==3.9.1 \
     # indy-plenum==1.13.0.dev1032 \
