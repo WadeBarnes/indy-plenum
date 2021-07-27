@@ -111,7 +111,7 @@ setup(
                         'libnacl==1.6.1',
                         'msgpack-python',
                         'orderedset',
-                        'pip<10.0.0',
+                        # 'pip<10.0.0',
                         'packaging',
                         'portalocker>=2.2.1',
                         'prompt_toolkit>=3.0.16',
