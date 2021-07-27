@@ -104,7 +104,6 @@ setup(
                         'semver',
                         'base58',
                         'orderedset',
-                        'sortedcontainers>=1.5.7',
                         'psutil>=5.6.6',
                         'importlib_metadata>=2.0',
                         'portalocker>=2.2.1',
