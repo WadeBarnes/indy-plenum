@@ -49,8 +49,11 @@ RUN pip3 install -U \
     # flake8==3.9.1 \
     # indy-plenum==1.13.0.dev1032 \
     # indy-node==1.13.0.dev1222 \
+    #### ++++++++++++ set-version requirements +++++++++++++++++
     # needs to be installed because from python 3.8: "importlib_metadata supplies a backport of importlib.metadata as found in Python 3.8 and later for earlier Python releases. Users of Python 3.8 and beyond are encouraged to use the standard library module when possible and fall back to importlib_metadata when necessary"
     importlib_metadata>=2.0 \
+    python-dateutil \
+    #### ++++++++++++++++++++++++++++
     # iniconfig==1.1.1 \
     # intervaltree==2.1.0 \
     # ioflo==2.0.2 \
