@@ -82,7 +82,7 @@ RUN pip3 install -U \
     python-ursa==0.1.1 \
     python3-indy==1.16.0 \
     pyzmq==18.1.0 \
-    # rlp==0.6.0 \
+    rlp==0.6.0 \
     semver==2.13.0 \
     ### setuptools v52.0.0 fails, because easy_install was removed https://setuptools.readthedocs.io/en/latest/history.html#v52-0-0
     ### ToDo:Test with setuptools==51.3.3
@@ -94,7 +94,7 @@ RUN pip3 install -U \
     toml==0.10.2 \
     ujson==1.33 \
     # wcwidth==0.2.5 \
-    wheel==0.34.2 
+    # wheel==0.34.2 
     # zipp==1.2.0
 
 # fails when executed in one command with other pip install packages
