@@ -84,7 +84,7 @@ RUN pip3 install -U \
     # python-dateutil==2.8.1 \
     # python-rocksdb==0.7.0 \
     # python-ursa==0.1.1 \
-    python3-indy==1.16.0 \
+    # python3-indy==1.16.0 \
     # pyzmq==18.1.0 \
     # rlp==0.6.0 \
     # semver==2.13.0 \
