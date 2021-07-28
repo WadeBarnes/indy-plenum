@@ -96,7 +96,7 @@ setup(
 
     install_requires=[
                         'base58==2.1.0',
-                        'intervaltree==2.1.0',
+                        # 'intervaltree==2.1.0',
                         'ioflo==2.0.2',
                         'jsonpickle==2.0.0',
                         'leveldb==0.201',
