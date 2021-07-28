@@ -2,6 +2,7 @@ FROM ubuntu:20.04
 
 ARG uid=1000
 ARG user=indy
+
 RUN apt-get update -y && apt-get install -y \
     # common stuff
     git \
@@ -14,10 +15,10 @@ RUN apt-get update -y && apt-get install -y \
 # ========================================================================================================
 # Update repository signing keys
 # --------------------------------------------------------------------------------------------------------
-# Hyperledger
-RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 9692C00E657DDE61
-# Sovrin
-RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys CE7709D068DB5E88
+    # Hyperledger
+RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 9692C00E657DDE61 && \
+    # Sovrin
+    apt-key adv --keyserver keyserver.ubuntu.com --recv-keys CE7709D068DB5E88
 # ========================================================================================================
 
 # Plenum
@@ -54,8 +55,7 @@ RUN apt-get update -y && apt-get install -y \
     # Indy SDK
     libindy=1.15.0~1625-bionic \
     # Need to move libursa.so to parent dir
-    && mv /usr/lib/ursa/* /usr/lib && rm -rf /usr/lib/ursa \
-    && rm -rf /var/lib/apt/lists/*
+    && mv /usr/lib/ursa/* /usr/lib && rm -rf /usr/lib/ursa
 
 RUN pip3 install -U \
     # Required by setup.py
@@ -64,5 +64,5 @@ RUN pip3 install -U \
 # install fpm
 RUN gem install --no-document rake fpm
 
-RUN apt-get -y autoremove
-RUN rm -rf /var/lib/apt/lists/*
+RUN apt-get -y autoremove \
+    && rm -rf /var/lib/apt/lists/*
