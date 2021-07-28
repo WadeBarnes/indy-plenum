@@ -27,8 +27,8 @@ metadata = {'__file__': os.path.join(here, 'plenum', '__metadata__.py')}
 with open(metadata['__file__'], 'r') as f:
     exec(f.read(), metadata)
 
-tests_require = ['attrs>=20.3.0', 'pytest>=6.2.2', 'pytest-xdist>=2.2.1', 'pytest-forked>=1.3.0',
-                 'python3-indy==1.15.0-dev-1625', 'pytest-asyncio>=0.14.0']
+tests_require = ['attrs>=20.3.0', 'pytest==6.2.2', 'pytest-xdist==2.2.1', 'pytest-forked==1.3.0',
+                 'python3-indy==1.16.0', 'pytest-asyncio==0.14.0']
 
 
 class PyZMQCommand(distutils.cmd.Command):
@@ -95,41 +95,39 @@ setup(
     include_package_data=True,
 
     install_requires=[
-                        'base58',
+                        'base58==2.1.0',
                         # 'intervaltree>=2.1.0',
                         'ioflo',
-                        'jsonpickle',
-                        'leveldb>=0.201',
-                        'ioflo',
+                        'jsonpickle==2.0.0',
+                        'leveldb==0.201',
+                        'ioflo==2.0.2',
                         'semver',
                         'base58',
                         'orderedset',
-                        'psutil>=5.6.6',
+                        'psutil==5.6.6',
                         'importlib_metadata>=2.0',
-                        'portalocker>=2.2.1',
+                        'portalocker==2.2.1',
                         # Pinned because of changing size of `crypto_sign_SECRETKEYBYTES` from 32 to 64
-                        'libnacl==1.6.1',
-                        'msgpack-python',
-                        'orderedset',
+                        'libnacl==1.7.2',
+                        'msgpack-python==0.5.6',
+                        'orderedset==2.0.3',
                         # 'pip<10.0.0',
-                        'packaging',
-                        'portalocker>=2.2.1',
+                        'packaging==20.9',
                         'prompt_toolkit>=3.0.16',
-                        'psutil>=5.6.6',
                         # 'pygments>=2.2.0',
-                        'pympler>=0.8',
-                        'python-dateutil',
-                        'python-rocksdb',
+                        'Pympler==0.8',
+                        'python-dateutil==2.8.1',
+                        'python-rocksdb==0.7.0',
                         'python-ursa==0.1.1',
-                        'rlp<=0.6.0',
-                        'semver',
-                        'sha3',
-                        'six',
-                        'sortedcontainers>=1.5.7',
-                        'ujson>=1.33',
+                        'rlp==0.6.0',
+                        'semver==2.13.0',
+                        'sha3==0.2.1',
+                        'six==1.15.0',
+                        'sortedcontainers==1.5.7',
+                        'ujson==1.33',
                         ],
 
-    setup_requires=['pytest-runner'],
+    setup_requires=['pytest-runner==5.3.0'],
     extras_require={
         'tests': tests_require,
         'stats': ['python-firebase'],
