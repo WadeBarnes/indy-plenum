@@ -25,7 +25,8 @@ RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys CE7709D068DB5E88
 #  - Needed to pick up rocksdb=5.8.8
 RUN echo "deb  https://hyperledger.jfrog.io/artifactory/indy focal dev"  >> /etc/apt/sources.list && \
     echo "deb http://security.ubuntu.com/ubuntu bionic-security main"  >> /etc/apt/sources.list && \
-    echo "deb https://repo.sovrin.org/deb bionic master" >> /etc/apt/sources.list
+    echo "deb https://repo.sovrin.org/deb bionic master" >> /etc/apt/sources.list && \
+    echo "deb https://repo.sovrin.org/sdk/deb bionic master" >> /etc/apt/sources.list
 
 RUN apt-get update -y && apt-get install -y \
     # Python
@@ -46,18 +47,14 @@ RUN apt-get update -y && apt-get install -y \
     ruby-dev \
     rubygems \
     gcc \
-    make
-
-RUN apt-get update -y && apt-get install -y \
+    make \
     # Indy Node and Plenum
     libssl1.0.0 \
     ursa=0.3.2-1 \
-    # Need to move libursa.so to parent dir
-    && mv /usr/lib/ursa/* /usr/lib && rm -rf /usr/lib/ursa
-
-RUN apt-get update -y && apt-get install -y \
     # Indy SDK
     libindy=1.15.0~1625-bionic \
+    # Need to move libursa.so to parent dir
+    && mv /usr/lib/ursa/* /usr/lib && rm -rf /usr/lib/ursa \
     && rm -rf /var/lib/apt/lists/*
 
 RUN pip3 install -U \
