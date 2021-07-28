@@ -17,7 +17,7 @@ RUN apt-get update -y && apt-get install -y \
 # Hyperledger
 RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 9692C00E657DDE61
 # Sovrin
-RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys CE7709D068DB5E88 
+RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys CE7709D068DB5E88
 # ========================================================================================================
 
 # Plenum
@@ -46,19 +46,23 @@ RUN apt-get update -y && apt-get install -y \
     ruby-dev \
     rubygems \
     gcc \
-    make \
+    make
+
+RUN apt-get update -y && apt-get install -y \
     # Indy Node and Plenum
     libssl1.0.0 \
     ursa=0.3.2-1 \
+    # Need to move libursa.so to parent dir
+    && mv /usr/lib/ursa/* /usr/lib && rm -rf /usr/lib/ursa
+
+RUN apt-get update -y && apt-get install -y \
     # Indy SDK
     libindy=1.15.0~1625-bionic \
-    # Need to move libursa.so to parent dir
-    && mv /usr/lib/ursa/* /usr/lib && rm -rf /usr/lib/ursa \
     && rm -rf /var/lib/apt/lists/*
 
 RUN pip3 install -U \
     # Required by setup.py
-    setuptools==50.3.2    
+    setuptools==50.3.2
 
 # install fpm
 RUN gem install --no-document rake fpm
