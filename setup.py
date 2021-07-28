@@ -105,8 +105,8 @@ setup(
                         'importlib_metadata>=2.0',
                         'portalocker==2.2.1',
                         # Pinned because of changing size of `crypto_sign_SECRETKEYBYTES` from 32 to 64
-                        # 'libnacl==1.6.1',
-                        'libnacl==1.7.2',
+                        'libnacl==1.6.1',
+                        # 'libnacl==1.7.2',
                         'msgpack-python==0.5.6',
                         'orderedset==2.0.3',
                         # 'pip<10.0.0',
