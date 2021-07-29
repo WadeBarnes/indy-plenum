@@ -99,10 +99,10 @@ setup(
                         'base58',
                         # 'intervaltree==2.1.0',
                         # 'ioflo==2.0.2',
-                        'ioflo'
+                        'ioflo',
                         'jsonpickle==2.0.0',
                         # 'leveldb==0.201',
-                        'leveldb'
+                        'leveldb',
                         'semver==2.13.0',
                         'psutil==5.6.6',
                         'importlib_metadata>=2.0',
