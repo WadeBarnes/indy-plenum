@@ -129,14 +129,15 @@ setup(
                         # 'python-rocksdb==0.7.0',
                         'python-rocksdb',
                         'python-ursa==0.1.1',
-                        # 'rlp==0.6.0',
-                        'rlp',
+                        ### Tests fail without version pin (rlp)
+                        'rlp==0.6.0',
                         # 'sha3==0.2.1',
                         'sha3',
                         # 'six==1.15.0',
                         'six',
                         # 'sortedcontainers==1.5.7',
                         'sortedcontainers',
+                        ### Tests fail without version pin (ujson)
                         'ujson==1.33',
                         # 'ujson',
                         ],
