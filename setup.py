@@ -105,7 +105,7 @@ setup(
                         # 'leveldb==0.201',
                         'leveldb',
                         # 'semver==2.13.0',
-                        'semver'
+                        'semver',
                         # 'psutil==5.6.6',
                         'psutil',
                         'importlib_metadata>=2.0',
