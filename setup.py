@@ -103,7 +103,7 @@ setup(
                         'jsonpickle==2.0.0',
                         # 'leveldb==0.201',
                         'leveldb',
-                        'semver==2.13.0',
+                        # 'semver==2.13.0',
                         'psutil==5.6.6',
                         'importlib_metadata>=2.0',
                         'portalocker==2.2.1',
