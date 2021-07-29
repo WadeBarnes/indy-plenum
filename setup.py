@@ -123,7 +123,7 @@ setup(
                         'prompt_toolkit>=3.0.16',
                         # 'pygments==2.2.0',
                         # 'pympler==0.8',
-                        'pympler'
+                        'pympler',
                         # 'python-dateutil==2.8.1',
                         'python-dateutil',
                         # 'python-rocksdb==0.7.0',
