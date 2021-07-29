@@ -104,7 +104,8 @@ setup(
                         'jsonpickle',
                         # 'leveldb==0.201',
                         'leveldb',
-                        'semver==2.13.0',
+                        # 'semver==2.13.0',
+                        'semver'
                         # 'psutil==5.6.6',
                         'psutil',
                         'importlib_metadata>=2.0',
@@ -121,7 +122,8 @@ setup(
                         'packaging',
                         'prompt_toolkit>=3.0.16',
                         # 'pygments==2.2.0',
-                        'pympler==0.8',
+                        # 'pympler==0.8',
+                        'pympler'
                         # 'python-dateutil==2.8.1',
                         'python-dateutil',
                         # 'python-rocksdb==0.7.0',
