@@ -134,8 +134,8 @@ setup(
                         'sha3',
                         # 'six==1.15.0',
                         'six',
-                        # 'sortedcontainers==1.5.7',
-                        'sortedcontainers',
+                        'sortedcontainers==1.5.7',
+                        # 'sortedcontainers',
                         'ujson==1.33',
                         ],
 
