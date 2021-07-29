@@ -8,7 +8,7 @@ from setuptools.command.install import install
 from setuptools.command.develop import develop
 
 v = sys.version_info
-if sys.version_info < (3, 5):
+if sys.version_info < (3, 8):
     msg = "FAIL: Requires Python 3.5 or later, " \
           "but setup.py was run using {}.{}.{}"
     v = sys.version_info
