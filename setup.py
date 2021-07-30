@@ -135,8 +135,8 @@ setup(
                         'sha3',
                         # 'six==1.15.0',
                         'six',
-                        # 'sortedcontainers==1.5.7',
-                        'sortedcontainers',
+                        'sortedcontainers==1.5.7',
+                        # 'sortedcontainers',
                         ### Tests fail without version pin (GHA run: https://github.com/udosson/indy-plenum/actions/runs/1078741118)
                         'ujson==1.33',
                         # 'ujson',
