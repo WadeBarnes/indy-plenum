@@ -30,14 +30,11 @@ with open(metadata['__file__'], 'r') as f:
 tests_require = ['attrs==20.3.0', 'pytest==6.2.2', 'pytest-xdist==2.2.1', 'pytest-forked==1.3.0',
                  'python3-indy==1.15.0-dev-1625', 'pytest-asyncio==0.14.0']
 
-# tests_require = ['attrs==20.3.0', 'pytest==6.2.2', 'pytest-xdist==2.2.1', 'pytest-forked',
-#                  'python3-indy==1.15.0-dev-1625', 'pytest-asyncio']
 
 class PyZMQCommand(distutils.cmd.Command):
     description = 'pyzmq install target'
 
-    # version = 'pyzmq==18.1.0'
-    version = 'pyzmq'
+    version = 'pyzmq==18.1.0'
     options = '--install-option=--zmq=bundled'
 
     def initialize_options(self):
@@ -132,7 +129,7 @@ setup(
                         # 'python-rocksdb==0.7.0',
                         'python-rocksdb',
                         'python-ursa==0.1.1',
-                        ### Tests fail without version pin (rlp)
+                        ### Tests fail without version pin (GHA run: https://github.com/udosson/indy-plenum/actions/runs/1078745445)
                         'rlp==0.6.0',
                         # 'sha3==0.2.1',
                         'sha3',
@@ -140,7 +137,7 @@ setup(
                         'six',
                         # 'sortedcontainers==1.5.7',
                         'sortedcontainers',
-                        ### Tests fail without version pin (ujson)
+                        ### Tests fail without version pin (GHA run: https://github.com/udosson/indy-plenum/actions/runs/1078741118)
                         'ujson==1.33',
                         # 'ujson',
                         ],
