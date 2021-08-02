@@ -8,8 +8,8 @@ from setuptools.command.install import install
 from setuptools.command.develop import develop
 
 v = sys.version_info
-if sys.version_info < (3, 5):
-    msg = "FAIL: Requires Python 3.5 or later, " \
+if sys.version_info < (3, 8):
+    msg = "FAIL: Requires Python 3.8 or later, " \
           "but setup.py was run using {}.{}.{}"
     v = sys.version_info
     print(msg.format(v.major, v.minor, v.micro))
@@ -27,8 +27,8 @@ metadata = {'__file__': os.path.join(here, 'plenum', '__metadata__.py')}
 with open(metadata['__file__'], 'r') as f:
     exec(f.read(), metadata)
 
-tests_require = ['attrs>=20.3.0', 'pytest>=6.2.2', 'pytest-xdist>=2.2.1', 'pytest-forked>=1.3.0',
-                 'python3-indy==1.15.0-dev-1625', 'pytest-asyncio>=0.14.0']
+tests_require = ['attrs==20.3.0', 'pytest==6.2.2', 'pytest-xdist==2.2.1', 'pytest-forked==1.3.0',
+                 'python3-indy==1.15.0-dev-1625', 'pytest-asyncio==0.14.0']
 
 
 class PyZMQCommand(distutils.cmd.Command):
@@ -95,46 +95,58 @@ setup(
     include_package_data=True,
 
     install_requires=[
+                        # 'base58==2.1.0',
                         'base58',
-                        'intervaltree>=2.1.0',
+                        # 'intervaltree==2.1.0',
+                        # 'ioflo==2.0.2',
                         'ioflo',
+                        # 'jsonpickle==2.0.0',
                         'jsonpickle',
-                        'leveldb>=0.201',
-                        'ioflo',
+                        # 'leveldb==0.201',
+                        'leveldb',
+                        # 'semver==2.13.0',
                         'semver',
-                        'base58',
-                        'orderedset',
-                        'sortedcontainers>=1.5.7',
-                        'psutil>=5.6.6',
+                        # 'psutil==5.6.6',
+                        'psutil',
                         'importlib_metadata>=2.0',
-                        'portalocker>=2.2.1',
+                        # 'portalocker==2.2.1',
+                        'portalocker',
                         # Pinned because of changing size of `crypto_sign_SECRETKEYBYTES` from 32 to 64
                         'libnacl==1.6.1',
+                        # 'msgpack-python==0.5.6',
                         'msgpack-python',
+                        # 'orderedset==2.0.3',
                         'orderedset',
-                        'pip<10.0.0',
+                        # 'pip<10.0.0',
+                        # 'packaging==20.9',
                         'packaging',
-                        'portalocker>=2.2.1',
                         'prompt_toolkit>=3.0.16',
-                        'psutil>=5.6.6',
-                        'pygments>=2.2.0',
-                        'pympler>=0.8',
+                        # 'pygments==2.2.0',
+                        # Pinned because tests fail with v.0.9
+                        'pympler==0.8',
+                        # 'python-dateutil==2.8.1',
                         'python-dateutil',
+                        # 'python-rocksdb==0.7.0',
                         'python-rocksdb',
                         'python-ursa==0.1.1',
-                        'rlp<=0.6.0',
-                        'semver',
+                        ### Tests fail without version pin (GHA run: https://github.com/udosson/indy-plenum/actions/runs/1078745445)
+                        'rlp==0.6.0',
+                        # 'sha3==0.2.1',
                         'sha3',
+                        # 'six==1.15.0',
                         'six',
-                        'sortedcontainers>=1.5.7',
-                        'ujson>=1.33',
+                        'sortedcontainers==1.5.7',
+                        # 'sortedcontainers',
+                        ### Tests fail without version pin (GHA run: https://github.com/udosson/indy-plenum/actions/runs/1078741118)
+                        'ujson==1.33',
+                        # 'ujson',
                         ],
 
-    setup_requires=['pytest-runner'],
+    setup_requires=['pytest-runner==5.3.0'],
     extras_require={
         'tests': tests_require,
         'stats': ['python-firebase'],
-        'benchmark': ['pympler']
+        'benchmark': ['pympler==0.8']
     },
     tests_require=tests_require,
     scripts=['scripts/init_plenum_keys',

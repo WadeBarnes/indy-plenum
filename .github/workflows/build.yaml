@@ -7,6 +7,7 @@ on:
       - ubuntu-20.04
       - ubuntu-20.04-upgrade
       - publishing-artifacts-ubuntu-20.04
+      - dependency_cleaning_ubuntu_20.04
   pull_request:
     branches:
       - master
@@ -14,6 +15,7 @@ on:
       - ubuntu-20.04
       - ubuntu-20.04-upgrade
       - publishing-artifacts-ubuntu-20.04
+      - dependency_cleaning_ubuntu_20.04
 jobs:
   workflow-setup:
     name: Initialize Workflow
@@ -50,7 +52,7 @@ jobs:
             echo "::set-output name=CACHE_KEY_LINT::${{ hashFiles('.github/workflows/lint/Dockerfile.ubuntu-1604') }}"
             echo "::set-output name=UBUNTU_VERSION::ubuntu-1604"
           fi
-          if [[ "${{github.base_ref}}" == "ubuntu-20.04" || "${{github.ref}}" == "refs/heads/ubuntu-20.04" ||  "${{github.base_ref}}" == "ubuntu-20.04-upgrade" || "${{github.ref}}" == "refs/heads/ubuntu-20.04-upgrade" || "${{github.base_ref}}" == "publishing-artifacts-ubuntu-20.04" || "${{github.ref}}" == "refs/heads/publishing-artifacts-ubuntu-20.04" ]]; then
+          if [[ "${{github.base_ref}}" == "ubuntu-20.04" || "${{github.ref}}" == "refs/heads/ubuntu-20.04" ||  "${{github.base_ref}}" == "ubuntu-20.04-upgrade" || "${{github.ref}}" == "refs/heads/ubuntu-20.04-upgrade" || "${{github.base_ref}}" == "publishing-artifacts-ubuntu-20.04" || "${{github.ref}}" == "refs/heads/publishing-artifacts-ubuntu-20.04" || "${{github.base_ref}}" == "dependency_cleaning_ubuntu_20.04" || "${{github.ref}}" == "refs/heads/dependency_cleaning_ubuntu_20.04" ]]; then
             echo "::set-output name=CACHE_KEY_BUILD::${{ hashFiles('.github/workflows/build/Dockerfile.ubuntu-2004') }}"
             echo "::set-output name=CACHE_KEY_LINT::${{ hashFiles('.github/workflows/lint/Dockerfile.ubuntu-2004') }}"
             echo "::set-output name=UBUNTU_VERSION::ubuntu-2004"
@@ -237,20 +239,21 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v2
 
-      - name: Cache pip
-        uses: actions/cache@v2
-        with:
-          # pip cache on the plenum-build image is not in the default location.
-          # path: ~/.cache/pip
-          path: /root/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt', '**/setup.py') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
+      # - name: Cache pip
+      #   uses: actions/cache@v2
+      #   with:
+      #     # pip cache on the plenum-build image is not in the default location.
+      #     # path: ~/.cache/pip
+      #     path: /root/.cache/pip
+      #     key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt', '**/setup.py') }}
+      #     restore-keys: |
+      #       ${{ runner.os }}-pip-
 
       - name: Install dependencies
         run: |
           # Explicitly use the existing pip cache location in the plenum-build image.
-          pip --cache-dir /root/.cache/pip install .[tests]
+          # pip --cache-dir /root/.cache/pip install .[tests]
+          pip install .[tests]
 
       - name: Run Indy Plenum ${{ matrix.module }} test slice ${{ matrix.slice }}/${{ strategy.job-total }}
         id: plenum-test
@@ -291,20 +294,21 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v2
 
-      - name: Cache pip
-        uses: actions/cache@v2
-        with:
-          # pip cache on the plenum-build image is not in the default location.
-          # path: ~/.cache/pip
-          path: /root/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt', '**/setup.py') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
+      # - name: Cache pip
+      #   uses: actions/cache@v2
+      #   with:
+      #     # pip cache on the plenum-build image is not in the default location.
+      #     # path: ~/.cache/pip
+      #     path: /root/.cache/pip
+      #     key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt', '**/setup.py') }}
+      #     restore-keys: |
+      #       ${{ runner.os }}-pip-
 
       - name: Install dependencies
         run: |
           # Explicitly use the existing pip cache location in the plenum-build image.
-          pip --cache-dir /root/.cache/pip install .[tests]
+          # pip --cache-dir /root/.cache/pip install .[tests]
+          pip install .[tests]
 
       - name: Run Indy Plenum ${{ matrix.module }} tests
         run: python3 -m pytest -l -vv --junitxml=test-result-plenum-${{ matrix.module }}.xml ${{ matrix.module }}
