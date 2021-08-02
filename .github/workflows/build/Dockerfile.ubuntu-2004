@@ -66,6 +66,7 @@ RUN pip3 install -U \
 
 
 # install fpm
+RUN gem install --no-document rake fpm
 
 RUN apt-get -y autoremove \
     && rm -rf /var/lib/apt/lists/*
