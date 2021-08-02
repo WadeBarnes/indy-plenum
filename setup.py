@@ -95,8 +95,8 @@ setup(
     include_package_data=True,
 
     install_requires=[
-                        # 'base58==2.1.0',
-                        'base58',
+                        'base58==2.1.0',
+                        # 'base58',
                         # 'intervaltree==2.1.0',
                         # 'ioflo==2.0.2',
                         'ioflo',
