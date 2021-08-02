@@ -29,6 +29,9 @@ RUN echo "deb  https://hyperledger.jfrog.io/artifactory/indy focal dev"  >> /etc
     echo "deb https://repo.sovrin.org/deb bionic master" >> /etc/apt/sources.list && \
     echo "deb https://repo.sovrin.org/sdk/deb bionic master" >> /etc/apt/sources.list
 
+# Sovrin
+RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys CE7709D068DB5E88 
+
 RUN apt-get update -y && apt-get install -y \
     # Python
     python3-pip \
@@ -61,8 +64,8 @@ RUN pip3 install -U \
     # Required by setup.py
     setuptools==50.3.2
 
+
 # install fpm
-RUN gem install --no-document rake fpm
 
 RUN apt-get -y autoremove \
     && rm -rf /var/lib/apt/lists/*
