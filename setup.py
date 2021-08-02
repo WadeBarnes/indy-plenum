@@ -107,7 +107,7 @@ setup(
                         # Pinned because of changing size of `crypto_sign_SECRETKEYBYTES` from 32 to 64
                         'libnacl==1.6.1',
                         # 'msgpack-python==0.5.6',
-                        'msgpack',
+                        'msgpack-python'
                         # 'orderedset==2.0.3',
                         'orderedset',
                         # 'packaging==20.9',

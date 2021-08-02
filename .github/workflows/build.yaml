@@ -382,14 +382,14 @@ jobs:
         uses: actions/cache@v2
         with:
           path: /tmp/third-party-dependencies
-          key: third-party-dependencies-${{ hashFiles('./build-scripts/${{ env.UBUNTU_VERSION }}/build-3rd-parties.sh') }}
+          key: third-party-dependencies-${{ hashFiles('./build-scripts/${{ needs.workflow-setup.outputs.UBUNTU_VERSION }}/build-3rd-parties.sh') }}
 
       - name: Build 3rd party deployment packages
         if: steps.third-party-dependencies.outputs.cache-hit != 'true'
         run: |
-          mkdir -p ./build-scripts/${{ env.UBUNTU_VERSION }}/cache/3rd-party-dependencies/
-          ./build-scripts/${{ env.UBUNTU_VERSION }}/build-3rd-parties.sh ./cache/3rd-party-dependencies
-          mv ./build-scripts/${{ env.UBUNTU_VERSION }}/cache/* /tmp/third-party-dependencies
+          mkdir -p ./build-scripts/${{ needs.workflow-setup.outputs.UBUNTU_VERSION }}/cache/3rd-party-dependencies/
+          ./build-scripts/${{ needs.workflow-setup.outputs.UBUNTU_VERSION }}/build-3rd-parties.sh ./cache/3rd-party-dependencies
+          mv ./build-scripts/${{ needs.workflow-setup.outputs.UBUNTU_VERSION }}/cache/* /tmp/third-party-dependencies
 
   publish_artifacts:
     name: Publish Artifacts
