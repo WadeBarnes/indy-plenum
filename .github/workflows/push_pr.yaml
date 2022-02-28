@@ -16,7 +16,6 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       CACHE_KEY_BUILD: ${{ steps.cache.outputs.CACHE_KEY_BUILD }}
-      CACHE_KEY_LINT: ${{ steps.cache.outputs.CACHE_KEY_LINT }}
       UBUNTU_VERSION: ${{ steps.cache.outputs.UBUNTU_VERSION }}
       # Expose the lowercase version of the GitHub repository name
       # to all subsequent jobs that reference image repositories
@@ -44,13 +43,11 @@ jobs:
           # Set variables according to version of ubuntu
           if [[ "${{github.base_ref}}" == "master" || "${{github.ref}}" == "refs/heads/master" ]]; then
             echo "::set-output name=CACHE_KEY_BUILD::${{ hashFiles('.github/workflows/build/Dockerfile.ubuntu-1604') }}"
-            echo "::set-output name=CACHE_KEY_LINT::${{ hashFiles('.github/workflows/lint/Dockerfile.ubuntu-1604') }}"
             echo "::set-output name=UBUNTU_VERSION::ubuntu-1604"
             echo "::set-output name=distribution::xenial"
           fi
           if [[ "${{github.base_ref}}" == "ubuntu-20.04-upgrade" || "${{github.ref}}" == "refs/heads/ubuntu-20.04-upgrade" ]]; then
             echo "::set-output name=CACHE_KEY_BUILD::${{ hashFiles('.github/workflows/build/Dockerfile.ubuntu-2004') }}"
-            echo "::set-output name=CACHE_KEY_LINT::${{ hashFiles('.github/workflows/lint/Dockerfile.ubuntu-2004') }}"
             echo "::set-output name=UBUNTU_VERSION::ubuntu-2004"
             echo "::set-output name=distribution::focal"
           fi
