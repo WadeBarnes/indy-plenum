@@ -140,7 +140,7 @@ jobs:
     if: needs.workflow-setup.outputs.publish == 'true'
     uses: ./.github/workflows/publish_artifacts.yaml
     with:
-      GITHUB_REPOSITORY_NAME: ${{ needs.workflow-setup.outputs.GITHUB_REPOSITORY_NAME }}
+      GITHUB_REF: ${{ needs.workflow-setup.outputs.GITHUB_REF }}
       UBUNTU_VERSION: ${{ needs.workflow-setup.outputs.UBUNTU_VERSION }}
       distribution: ${{ needs.workflow-setup.outputs.distribution }}
     secrets:
