@@ -1,54 +1,75 @@
 @startuml
 
-:**Draft Release Triggered Workflow**;
+:**Tag Triggered - Release Workflow**;
 start
 
-:**Create a new Draft Release in GitHub**
-  - Set the title as the version number e.g. v1.14.7-rc0
-  - Select the target branch, typically `main`
-  - Set the tag as the version number e.g. v1.14.7-rc0? - See note
-  - Check pre-release for RC releases, leave unchecked for official releases? - See note
-  - Save the release as a draft
-;
-note right
-  Could/should the tag be set by the release workflow?
-  It would be one less step needed when creating the release.
-  Less is more.
-  Same with the selection of pre-release.
-  Could that be done based on the version specified for the release?
-end note
+:Create a tag on the branch and commit on which the release 
+is to be based. 
 
-:Release Workflow(s) Triggered by creation of the Draft Release;
-:Check out target branch;
-:Bump version using the version specified by the release
-  - RC or official release handling based on the version
-     number of the release.
-;
-:Set the tag on the corresponding draft release? - See note above;
-:Set/clear pre-release on the corresponding draft release based on the version number?- See note above;
-:Submit 'Release' PR to the target branch;
+The tag must be in the following format:
+  - ""setRelease-v<Major>.<Minor>.<Patch>[-rc<Num>]""
 
-:Build, test, and packaging workflows triggered by submission of the 'Release' PR
-  - Testing would include the release criteria tests such as the indy-test-automation tests.
-  - Ability to merge the PR gated on all workflows passing.
-;
+Examples:
+  - To generate an RC Release (marked as a pre-release)
+  - ""setRelease-v1.12.6-rc0""
+  - To generate an official Release
+    - ""setRelease-v1.12.6"";
 
-if (All tests passed) then (Merge PR)
-  :Publish Release Workflow triggered by 'Release' PR being merged.
-    - This workflow would simply publish the corresponding draft release.
-    - Publishing the release would automatically tag the most recent
-       commit on the target branch (the one with the bumped version number).
-  ;
-  
-  :Release Workflow Triggered by publishing of the release;
+partition "**Workflow**: Release PR" {
+  floating note left
+    Workflow triggered 
+    by the ""setRelease""
+    tag being pushed.
+  end note
 
-  :Publish the Packages
-    - Preferably this would simply publish the packages that were
-       build and tested by the workflows that ran in response to the
-       release PR.
-  ;
+  :Check out target branch based on tag;
+  :Determine target branch from tag;
+  :Extract version number from tag;
+  :Bump package version;
+  :Submit 'Release' PR to the target branch;
+}
+
+partition "**Workflow**: Build / Test / Package" {
+  floating note left
+    Workflow triggered 
+    by the Release PR
+    being created.
+  end note
+
+  :Check out target branch;
+  :Build;
+  :Execute All Unit Tests;
+  :Execute All Release Tests 
+  (i.e. run indy-test-automation);
+  :Build Packages;
+}
+
+if (**Review PR** - All tests passed?) then (Merge PR)
+  partition "**Workflow**: Publish Release" {
+    floating note right
+      Workflow triggered 
+      by the Release PR
+      being merged.
+    end note
+
+    :Extract version number from the 
+    project's version file.  Which was 
+    contained in the Release PR.;
+    :Create a GitHub Release;
+    :Set tag and title to match release version;
+
+    if (is RC Release) then (yes)
+      :Set pre-release checkbox;
+    else (no)
+    endif
+
+    :Publish Packages
+      - Preferably this would simply publish the packages that were
+         build and tested by the Build / Test / Package Workflow.;
+    :Publish GitHub Release;
+  }
 else (Close PR without Merging)
-  :Delete Draft Release;
+  :Release process aborted;
 endif
 
 stop
