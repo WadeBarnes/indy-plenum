@@ -1,0 +1,55 @@
+@startuml
+
+:**Draft Release Triggered Workflow**;
+start
+
+:**Create a new Draft Release in GitHub**
+  - Set the title as the version number e.g. v1.14.7-rc0
+  - Select the target branch, typically `main`
+  - Set the tag as the version number e.g. v1.14.7-rc0? - See note
+  - Check pre-release for RC releases, leave unchecked for official releases? - See note
+  - Save the release as a draft
+;
+note right
+  Could/should the tag be set by the release workflow?
+  It would be one less step needed when creating the release.
+  Less is more.
+  Same with the selection of pre-release.
+  Could that be done based on the version specified for the release?
+end note
+
+:Release Workflow(s) Triggered by creation of the Draft Release;
+:Check out target branch;
+:Bump version using the version specified by the release
+  - RC or official release handling based on the version
+     number of the release.
+;
+:Set the tag on the corresponding draft release? - See note above;
+:Set/clear pre-release on the corresponding draft release based on the version number?- See note above;
+:Submit 'Release' PR to the target branch;
+
+:Build, test, and packaging workflows triggered by submission of the 'Release' PR
+  - Testing would include the release criteria tests such as the indy-test-automation tests.
+  - Ability to merge the PR gated on all workflows passing.
+;
+
+if (All tests passed) then (Merge PR)
+  :Publish Release Workflow triggered by 'Release' PR being merged.
+    - This workflow would simply publish the corresponding draft release.
+    - Publishing the release would automatically tag the most recent
+       commit on the target branch (the one with the bumped version number).
+  ;
+  
+  :Release Workflow Triggered by publishing of the release;
+
+  :Publish the Packages
+    - Preferably this would simply publish the packages that were
+       build and tested by the workflows that ran in response to the
+       release PR.
+  ;
+else (Close PR without Merging)
+  :Delete Draft Release;
+endif
+
+stop
+@enduml
