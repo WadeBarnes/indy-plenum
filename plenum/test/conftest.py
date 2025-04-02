@@ -1356,8 +1356,7 @@ def vdr_node_created_after_some_txns(looper, testNodeClass, do_post_node_creatio
                                      txnPoolNodeSet, tdir, tconf, allPluginsPath, request):
     txnCount = getValueFromModule(request, "txnCount", 5)
     vdr_send_random_and_check(looper, txnPoolNodeSet, vdr_pool_handle, 
-                              vdr_wallet_client, vdr_pool_handle,
-                              txnCount)
+                              vdr_wallet_client, txnCount)
     new_steward_name = randomString()
     new_node_name = "Epsilon"
     new_steward_wallet_handle, pool_handle = vdr_add_new_steward_and_node(

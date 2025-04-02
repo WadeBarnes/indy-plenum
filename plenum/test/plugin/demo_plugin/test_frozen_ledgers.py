@@ -1,7 +1,8 @@
 import pytest
+import json
 from plenum.test.plugin.demo_plugin.constants import AUCTION_LEDGER_ID
 
-from plenum.test.freeze_ledgers.helper import sdk_send_freeze_ledgers, sdk_get_frozen_ledgers
+from plenum.test.freeze_ledgers.helper import vdr_send_freeze_ledgers, vdr_get_frozen_ledgers
 from plenum.test.helper import freshness
 
 from plenum.common.constants import DATA
@@ -23,20 +24,24 @@ def test_send_freeze_ledgers(looper, txnPoolNodeSet, vdr_pool_handle, vdr_wallet
     ledger_to_remove = AUCTION_LEDGER_ID
 
     # check that the config state doesn't contain frozen ledgers records
-    result = sdk_get_frozen_ledgers(looper, vdr_pool_handle,
-                                    vdr_wallet_trustee)[1]["result"][DATA]
+    result = vdr_get_frozen_ledgers(looper, vdr_pool_handle,
+                                    vdr_wallet_trustee)
+    result = json.loads(result[1][list(result[1].keys())[0]])
+    result = result["result"][DATA]
     assert result is None
 
     # add to the config state a frozen ledgers record with an empty list
-    sdk_send_freeze_ledgers(
+    res = vdr_send_freeze_ledgers(
         looper, vdr_pool_handle,
         [vdr_wallet_trustee],
         []
     )
 
     # check that the config state contains a frozen ledgers record with an empty list
-    result = sdk_get_frozen_ledgers(looper, vdr_pool_handle,
-                                    vdr_wallet_trustee)[1]["result"][DATA]
+    result = vdr_get_frozen_ledgers(looper, vdr_pool_handle,
+                                    vdr_wallet_trustee)
+    result = json.loads(result[1][list(result[1].keys())[0]])
+    result = result["result"][DATA]
     assert len(result) == 0
 
     # add to the config state a frozen ledgers record with AUCTION ledger
@@ -44,30 +49,34 @@ def test_send_freeze_ledgers(looper, txnPoolNodeSet, vdr_pool_handle, vdr_wallet
         check_freshness_updated_for_ledger, txnPoolNodeSet, ledger_to_remove,
         timeout=3 * FRESHNESS_TIMEOUT)
     )
-    sdk_send_freeze_ledgers(
+    vdr_send_freeze_ledgers(
         looper, vdr_pool_handle,
         [vdr_wallet_trustee],
         [ledger_to_remove]
     )
 
     # check that the config state contains a frozen ledgers record with AUCTION ledger
-    result = sdk_get_frozen_ledgers(looper, vdr_pool_handle,
-                                    vdr_wallet_trustee)[1]["result"][DATA]
+    result = vdr_get_frozen_ledgers(looper, vdr_pool_handle,
+                                    vdr_wallet_trustee)
+    result = json.loads(result[1][list(result[1].keys())[0]])
+    result = result["result"][DATA]
     assert len(result) == 1
     assert result[str(ledger_to_remove)]["state"]
     assert result[str(ledger_to_remove)]["ledger"]
     assert result[str(ledger_to_remove)]["seq_no"] >= 0
 
     # add to the config state a frozen ledgers record with an empty list
-    sdk_send_freeze_ledgers(
+    vdr_send_freeze_ledgers(
         looper, vdr_pool_handle,
         [vdr_wallet_trustee],
         []
     )
 
     # check that the frozen ledgers list from the state wasn't cleared by the transaction with empty ledgers' list
-    result = sdk_get_frozen_ledgers(looper, vdr_pool_handle,
-                                    vdr_wallet_trustee)[1]["result"][DATA]
+    result = vdr_get_frozen_ledgers(looper, vdr_pool_handle,
+                                    vdr_wallet_trustee)
+    result = json.loads(result[1][list(result[1].keys())[0]])
+    result = result["result"][DATA]
     assert len(result) == 1
     assert result[str(ledger_to_remove)]["state"]
     assert result[str(ledger_to_remove)]["ledger"]

@@ -354,8 +354,7 @@ def vdr_pool_refresh(looper, vdr_pool_handle):
 
 
 def vdr_build_get_txn_request(looper, steward_did, seq_no, ledger_type=None):
-    request = looper.loop.run_until_complete(
-        build_get_txn_request(steward_did, ledger_type, seq_no))
+    request = build_get_txn_request(steward_did, ledger_type, seq_no)
     return request
 
 

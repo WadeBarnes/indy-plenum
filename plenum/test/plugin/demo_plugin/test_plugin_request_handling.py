@@ -1,10 +1,10 @@
 import pytest
 
 from plenum.common.constants import TXN_TYPE, DATA
-from plenum.common.exceptions import CommonSdkIOException
+from plenum.common.exceptions import CommonSdkIOException, RequestNackedException
 from plenum.test.plugin.demo_plugin.helper import successful_op
 from plenum.test.helper import vdr_send_signed_requests, \
-    vdr_sign_request_strings, vdr_get_and_check_replies
+    vdr_sign_request_strings, vdr_get_and_check_replies, vdr_gen_request
 from plenum.test.plugin.demo_plugin.constants import AMOUNT, PLACE_BID, \
     AUCTION_START, AUCTION_END
 from stp_core.loop.eventually import eventually
@@ -20,11 +20,14 @@ def test_plugin_static_validation(txn_pool_node_set_post_creation, looper,
     op = {
         TXN_TYPE: AUCTION_START
     }
-    reqs = vdr_sign_request_strings(looper, vdr_wallet_steward, [op, ])
+    _, submitter_did = vdr_wallet_steward
+    reqs = vdr_gen_request(op, identifier=submitter_did)
+    reqs = vdr_sign_request_strings(looper, vdr_wallet_steward, [reqs])
     reqs = vdr_send_signed_requests(vdr_pool_handle, reqs, looper)
-    with pytest.raises(CommonSdkIOException) as exc_info:
+    with pytest.raises(RequestNackedException) as exc_info:
         vdr_get_and_check_replies(looper, reqs)
     exc_info.match('Got an error with code 113')
+    # Cannot determine if the new error is valid given the static nature of the response from 
 
     op = {
         TXN_TYPE: AUCTION_START,
