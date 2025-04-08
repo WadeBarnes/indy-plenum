@@ -2,7 +2,7 @@ import pytest
 
 from plenum.common.constants import DATA
 from plenum.common.exceptions import RequestNackedException, RequestRejectedException
-from plenum.test.freeze_ledgers.helper import sdk_send_freeze_ledgers
+from plenum.test.freeze_ledgers.helper import vdr_send_freeze_ledgers
 
 from plenum.test.node_catchup.helper import ensure_all_nodes_have_same_data
 from plenum.test.node_request.helper import sdk_ensure_pool_functional
